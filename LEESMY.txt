@@ -1,11 +1,11 @@
 REKENAARORGANISASIE — STUDIEGIDS
 
 AANLYN:
-Laai die hele NRORG-Studiegids-HTML-gids na enige gewone statiese webgasheer op. Open dan index.html.
+Die inhoud van hierdie gids is in die bewaarplek se hoofpad beskikbaar vir GitHub Pages.
 
 PLAASLIK / AF LYN:
 1. Pak NRORG-Studiegids-HTML.zip volledig uit.
 2. Dubbelklik index.html om dit in Chrome, Edge of Firefox oop te maak.
 3. Hou die assets-gids langs index.html. Moenie die lêers se name of struktuur verander nie.
 
-Die pakket bevat die HTML, JavaScript, CSS en plaaslike beeldbates wat die studiegids benodig. Die invuloefeninge en nasien werk binne die blaaier. Antwoorde word nie na ’n bediener gestuur of permanent gestoor nie.
+Die pakket bevat HTML, JavaScript, CSS en alle studiebeeldbates. Die invuloefeninge en nasien werk binne die blaaier. Antwoorde word nie na ’n bediener gestuur of permanent gestoor nie.

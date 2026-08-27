@@ -9,8 +9,13 @@ import Home from "./pages/Home";
 
 function Router() {
   // Ingenieurswerkboek: behou dieselfde studiegids-ervaring wanneer die pakket plaaslik vanaf index.html oopmaak.
-  if (typeof window !== "undefined" && window.location.protocol === "file:") {
-    return <Home />;
+  if (typeof window !== "undefined") {
+    const isLocalFile = window.location.protocol === "file:";
+    const isGitHubPagesPath = window.location.pathname.startsWith("/NRORG---Rekenaar-Organisasie/");
+
+    if (isLocalFile || isGitHubPagesPath) {
+      return <Home />;
+    }
   }
 
   return (
