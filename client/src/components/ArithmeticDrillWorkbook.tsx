@@ -156,7 +156,7 @@ function DivisionTable({ scenario, rows, answers, marked, onChange }: { scenario
 
 function DivisionTheoryInsert() {
   const [target, setTarget] = useState<HTMLElement | null>(null);
-  useEffect(() => setTarget(document.querySelector<HTMLElement>(".integer-calculation__blocks")), []);
+  useEffect(() => setTarget(document.querySelector<HTMLElement>(".integer-calculation__detail-panels")), []);
   if (!target) return null;
   return createPortal(<article className="integer-division-theory"><span>DELING</span><h4>Langdeling bou die heelgetal deel én die res.</h4><p>Werk die dividend <b>van links na regs</b> deur. Bring die volgende bis af, toets of die deler in jou huidige deelstuk pas, en skryf dan die volgende kwosiëntbis: <b>NEE → 0</b>; <b>JA → 1</b>, trek die deler af en hou die nuwe res vir die volgende stap.</p><figure className="division-theory__reference"><header><b>WOORD-BRON SKETS · BEREKEN 147 ÷ 11</b><code>10010011₂ ÷ 1011₂</code></header><img src={divisionReferenceSketch} alt="Aangehegte Word-bron skets vir die binêre langdeling 147 ÷ 11. Die kwosiëntbisse is bo, die aftrekwerklyne is onder, en die finale antwoord is 13 res 4."/><figcaption><b>Lees die kleurmerke in volgorde:</b> lila bou die kwosiënt; rooi wys die huidige besluit; groen wys die finale res.</figcaption></figure><aside className="division-theory__memory"><b>Onthou die aftrekreël:</b> wanneer jy M aftrek, vorm M se <b>twee-komplement in dieselfde bislengte</b>—inverseer en tel <b>1</b> by. Die finale antwoord moet altyd die <b>heelgetal deel</b> én die <b>res</b> noem.</aside></article>, target);
 }
