@@ -8,6 +8,11 @@ import Home from "./pages/Home";
 
 
 function Router() {
+  // Ingenieurswerkboek: behou dieselfde studiegids-ervaring wanneer die pakket plaaslik vanaf index.html oopmaak.
+  if (typeof window !== "undefined" && window.location.protocol === "file:") {
+    return <Home />;
+  }
+
   return (
     <Switch>
       <Route path={"/"} component={Home} />
