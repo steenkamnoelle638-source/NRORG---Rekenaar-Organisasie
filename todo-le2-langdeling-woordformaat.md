@@ -5,4 +5,4 @@
 - [x] Vervang die langdelingstap-teks met die aangehegte skets.
 - [x] Pas die selfnasienbare langdeling-oefentabel by die Word-bronformaat aan.
 - [x] Bevestig dat Wisselpunt Voorstelling binne Heelgetalberekening volledig en bruikbaar bly.
-- [ ] Toets, checkpoint en sinchroniseer die bywerking met GitHub Pages.
+- [x] Toets, checkpoint en sinchroniseer die bywerking met GitHub Pages.
