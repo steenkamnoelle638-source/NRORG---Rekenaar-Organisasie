@@ -1,13 +1,16 @@
 /* Ingenieurswerkboek: LE2 gebruik klasgetroue C–A–Q–M- en langdelingroosters vir meganiese berekeningoefening. */
 import { Check, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import "./arithmetic-drill-workbook.css";
+import "./division-long-format.css";
 
 type Mode = "maal" | "deel";
 type MultiplicationScenario = { id: string; label: string; multiplicand: number; multiplier: number };
 type DivisionScenario = { id: string; label: string; dividend: number; divisor: number };
 type MultiplicationRow = { step: string; carry: string; accumulator: string; multiplier: string; multiplicand: string; note: string };
 type DivisionRow = { step: string; remainder: string; quotient: string; divisor: string; note: string };
+type LongDivisionRow = { step: string; bringDown: string; decision: "JA" | "NEE"; quotientBit: string; remainder: string; operation: string };
 
 const multiplicationScenarios: MultiplicationScenario[] = [
   { id: "maal-1", label: "01 · 10 × 6", multiplicand: 10, multiplier: 6 },
@@ -18,7 +21,7 @@ const multiplicationScenarios: MultiplicationScenario[] = [
 ];
 
 const divisionScenarios: DivisionScenario[] = [
-  { id: "deel-1", label: "01 · 90 ÷ 6", dividend: 90, divisor: 6 },
+  { id: "deel-1", label: "01 · 147 ÷ 11", dividend: 147, divisor: 11 },
   { id: "deel-2", label: "02 · 84 ÷ 7", dividend: 84, divisor: 7 },
   { id: "deel-3", label: "03 · 65 ÷ 5", dividend: 65, divisor: 5 },
   { id: "deel-4", label: "04 · 72 ÷ 8", dividend: 72, divisor: 8 },
@@ -71,6 +74,18 @@ function divisionRows({ dividend, divisor }: DivisionScenario): DivisionRow[] {
   return rows;
 }
 
+function longDivisionRows({ dividend, divisor }: DivisionScenario): LongDivisionRow[] {
+  let remainder = 0;
+  return Array.from(pad(dividend, 8)).map((bit, index) => {
+    const workingValue = remainder * 2 + Number(bit);
+    const decision = workingValue >= divisor ? "JA" : "NEE";
+    remainder = decision === "JA" ? workingValue - divisor : workingValue;
+    const working = workingValue.toString(2);
+    const divisorBits = pad(divisor, Math.max(4, working.length));
+    return { step: `Stap ${index + 1}`, bringDown: working, decision, quotientBit: decision === "JA" ? "1" : "0", remainder: remainder.toString(2), operation: decision === "JA" ? `${working} − ${divisorBits} = ${remainder.toString(2)}` : `${working} < ${divisorBits}; behou die waarde` };
+  });
+}
+
 function idFor(mode: Mode, scenarioId: string, row: number, field: string) { return `${mode}-${scenarioId}-${row}-${field}`; }
 
 export function ArithmeticDrillWorkbook() {
@@ -83,7 +98,8 @@ export function ArithmeticDrillWorkbook() {
   const key = `${mode}-${scenario.id}`;
   const isMarked = marked[key] ?? false;
   const rows = useMemo(() => mode === "maal" ? multiplicationRows(scenario as MultiplicationScenario) : divisionRows(scenario as DivisionScenario), [mode, scenario]);
-  const fieldCount = mode === "maal" ? rows.length * 5 : rows.length * 4;
+  const longRows = useMemo(() => mode === "deel" ? longDivisionRows(scenario as DivisionScenario) : [], [mode, scenario]);
+  const fieldCount = mode === "maal" ? rows.length * 5 : longRows.length * 4;
   const change = (id: string, value: string) => { setAnswers((current) => ({ ...current, [id]: value })); setMarked((current) => ({ ...current, [key]: false })); };
   const switchMode = (nextMode: Mode) => { setMode(nextMode); setActiveIndex(0); };
   const reset = () => { setAnswers((current) => Object.fromEntries(Object.entries(current).filter(([itemKey]) => !itemKey.startsWith(`${mode}-${scenario.id}-`)))); setMarked((current) => ({ ...current, [key]: false })); };
@@ -94,7 +110,8 @@ export function ArithmeticDrillWorkbook() {
   const divisionCorrect = (row: DivisionRow, rowIndex: number) => [
     ["remainder", row.remainder], ["quotient", row.quotient], ["divisor", row.divisor], ["note", row.note],
   ].filter(([field, expected]) => compact(answers[idFor(mode, scenario.id, rowIndex, field)] ?? "") === compact(expected)).length;
-  const correctFields = rows.reduce((total, row, index) => total + (mode === "maal" ? multiplicationCorrect(row as MultiplicationRow, index) : divisionCorrect(row as DivisionRow, index)), 0);
+  const longDivisionCorrect = (row: LongDivisionRow, rowIndex: number) => [["bringDown", row.bringDown], ["decision", row.decision], ["quotient", row.quotientBit], ["remainder", row.remainder]].filter(([field, expected]) => compact(answers[idFor("deel", scenario.id, rowIndex, field)] ?? "") === compact(expected)).length;
+  const correctFields = mode === "maal" ? rows.reduce((total, row, index) => total + multiplicationCorrect(row as MultiplicationRow, index), 0) : longRows.reduce((total, row, index) => total + longDivisionCorrect(row, index), 0);
 
   return <section className="arithmetic-workbook" aria-labelledby="arithmetic-workbook-heading">
     <header>
@@ -106,7 +123,8 @@ export function ArithmeticDrillWorkbook() {
     <nav className="arithmetic-workbook__modes" aria-label="LE2-oefentipe"><button type="button" className={mode === "maal" ? "active" : ""} onClick={() => switchMode("maal")}>MAAL · C–A–Q–M</button><button type="button" className={mode === "deel" ? "active" : ""} onClick={() => switchMode("deel")}>DEEL · LANGDELING</button></nav>
     <nav className="arithmetic-workbook__pages" aria-label={`${mode} oefenbladsye`}>{scenarios.map((item, index) => <button key={item.id} type="button" className={activeIndex === index ? "active" : ""} onClick={() => setActiveIndex(index)}>{item.label}</button>)}</nav>
 
-    {mode === "maal" ? <MultiplicationTable scenario={scenario as MultiplicationScenario} rows={rows as MultiplicationRow[]} answers={answers} marked={isMarked} onChange={change} /> : <DivisionTable scenario={scenario as DivisionScenario} rows={rows as DivisionRow[]} answers={answers} marked={isMarked} onChange={change} />}
+    <DivisionTheoryInsert />
+    {mode === "maal" ? <MultiplicationTable scenario={scenario as MultiplicationScenario} rows={rows as MultiplicationRow[]} answers={answers} marked={isMarked} onChange={change} /> : <LongDivisionTable scenario={scenario as DivisionScenario} rows={longRows} answers={answers} marked={isMarked} onChange={change} />}
 
     <footer>
       <div className="arithmetic-workbook__pager"><button type="button" onClick={() => setActiveIndex((index) => Math.max(0, index - 1))} disabled={activeIndex === 0}><ChevronLeft className="size-4"/>Vorige</button><b>{String(activeIndex + 1).padStart(2, "0")} / 05</b><button type="button" onClick={() => setActiveIndex((index) => Math.min(scenarios.length - 1, index + 1))} disabled={activeIndex === scenarios.length - 1}>Volgende<ChevronRight className="size-4"/></button></div>
@@ -133,4 +151,19 @@ function DivisionTable({ scenario, rows, answers, marked, onChange }: { scenario
   const remainder = scenario.dividend % scenario.divisor;
   const noteOptions = ["Oorspronklike dividend in Q; begin met A = 0", "Bring die volgende bis af; M pas nie; skryf 0 in die kwosiënt", "Bring die volgende bis af; trek M af; skryf 1 in die kwosiënt"];
   return <div className="arithmetic-workbook__sheet"><div className="arithmetic-workbook__brief"><span>OEFENBLAD · DEEL</span><code>Langdeling: {scenario.dividend} ÷ {scenario.divisor}</code><strong>Antwoord: {quotient} res {remainder} · {pad(quotient, 8)}₂</strong></div><p className="arithmetic-workbook__instruction">Werk van links na regs deur die <b>8-bis dividend</b>. Bring elke volgende bis na A af, vergelyk die gedeeltelike res met M, en skryf dan <b>1</b> (trek af) of <b>0</b> (moenie aftrek nie) in Q.</p><div className="arithmetic-workbook__longline"><b>{pad(scenario.divisor, 8)}</b><i>⟌</i><span>{pad(scenario.dividend, 8)}</span><small>divisor</small><small>dividend</small></div><div className="arithmetic-workbook__table-wrap"><table className="arithmetic-workbook__table arithmetic-workbook__table--divide"><thead><tr><th>Stap</th><th>A · gedeeltelike res</th><th>Q · kwosiënt</th><th>M · deler</th><th>Nota / aksie</th></tr></thead><tbody>{rows.map((row, index) => <tr key={row.step}><th>{row.step}</th><td><Input label={`${scenario.label}, ${row.step}, gedeeltelike res A`} value={answers[idFor("deel", key, index, "remainder")] ?? ""} expected={row.remainder} marked={marked} onChange={(value) => onChange(idFor("deel", key, index, "remainder"), value)} /></td><td><Input label={`${scenario.label}, ${row.step}, kwosiënt Q`} value={answers[idFor("deel", key, index, "quotient")] ?? ""} expected={row.quotient} marked={marked} onChange={(value) => onChange(idFor("deel", key, index, "quotient"), value)} /></td><td><Input label={`${scenario.label}, ${row.step}, deler M`} value={answers[idFor("deel", key, index, "divisor")] ?? ""} expected={row.divisor} marked={marked} onChange={(value) => onChange(idFor("deel", key, index, "divisor"), value)} /></td><td><select aria-label={`${scenario.label}, ${row.step}, nota`} className={marked ? (compact(answers[idFor("deel", key, index, "note")] ?? "") === compact(row.note) ? "correct" : "wrong") : ""} value={answers[idFor("deel", key, index, "note")] ?? ""} onChange={(event) => onChange(idFor("deel", key, index, "note"), event.target.value)}><option value="">Kies aksie</option>{noteOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select>{marked && compact(answers[idFor("deel", key, index, "note")] ?? "") !== compact(row.note) ? <small><b>{row.note}</b> — kyk of A groot genoeg is om M af te trek.</small> : null}</td></tr>)}</tbody></table></div></div>;
+}
+
+function DivisionTheoryInsert() {
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => setTarget(document.querySelector<HTMLElement>(".integer-calculation__blocks")), []);
+  if (!target) return null;
+  return createPortal(<article className="integer-division-theory"><span>DELING</span><h4>Langdeling bou die heelgetal deel én die res.</h4><p>Werk die dividend <b>van links na regs</b> deur. Bring die volgende bis af, toets of die deler in jou huidige deelstuk pas, en skryf dan die volgende kwosiëntbis: <b>NEE → 0</b>; <b>JA → 1</b>, trek die deler af en hou die nuwe res vir die volgende stap.</p><div className="division-theory__example"><header><b>WOORD-BRON VOORBEELD · 147 ÷ 11</b><code>10010011₂ ÷ 1011₂</code></header><div className="division-theory__steps"><div><b>1</b><span><code>1, 10, 100, 1001</code>: 1011 pas nog nie in nie; skryf vier keer <b>0</b> in die kwosiënt.</span></div><div><b>2</b><span>Bring 0 af: <code>10010 − 01011 = 00111</code>; 1011 pas in, dus skryf <b>1</b>.</span></div><div><b>3</b><span>Bring 0 af: <code>1110 − 1011 = 0011</code>; skryf weer <b>1</b>.</span></div><div><b>4</b><span>Bring 1 af: <code>111</code> is te klein; skryf <b>0</b>. Bring die laaste 1 af: <code>1111 − 1011 = 0100</code>; skryf <b>1</b>.</span></div></div><footer><span>HEELGETAL DEEL</span><strong>00001101₂ = 13</strong><span>RES</span><strong>0100₂ = 4</strong></footer></div><aside className="division-theory__memory"><b>Onthou die aftrekreël:</b> wanneer jy M aftrek, vorm M se <b>twee-komplement in dieselfde bislengte</b>—inverseer en tel <b>1</b> by. Die finale antwoord moet altyd die <b>heelgetal deel</b> én die <b>res</b> noem.</aside></article>, target);
+}
+
+function LongDivisionTable({ scenario, rows, answers, marked, onChange }: { scenario: DivisionScenario; rows: LongDivisionRow[]; answers: Record<string, string>; marked: boolean; onChange: (id: string, value: string) => void }) {
+  const key = scenario.id;
+  const quotient = Math.floor(scenario.dividend / scenario.divisor);
+  const remainder = scenario.dividend % scenario.divisor;
+  const correct = (index: number, field: string, expected: string) => compact(answers[idFor("deel", key, index, field)] ?? "") === compact(expected);
+  return <div className="arithmetic-workbook__sheet"><div className="arithmetic-workbook__brief"><span>OEFENBLAD · DEEL / LANGDELING FORMAAT</span><code>{scenario.dividend} ÷ {scenario.divisor}</code><strong>Skryf die kwosiënt bo; skryf die res onderaan.</strong></div><p className="arithmetic-workbook__instruction">Volg die Word-formaat: begin links by die dividend, bou die <b>kwosiëntbisse bo</b>, en skryf elke nuwe deelstuk en aftrekwerklyn <b>onder mekaar</b>. <b>NEE → 0</b>; <b>JA → 1</b> en trek M af.</p><section className="arithmetic-workbook__long-sheet" aria-label={`${scenario.label} langdelingformaat`}><div className="long-sheet__head"><div className="long-sheet__bracket"><b>{pad(scenario.divisor, 4)}</b><i>⟌</i><span>{pad(scenario.dividend, 8)}</span></div><div className="long-sheet__quotient"><span>KWOSIËNT</span>{rows.map((row, index) => <Input key={row.step} label={`${scenario.label}, kwosiëntbis ${index + 1}`} value={answers[idFor("deel", key, index, "quotient")] ?? ""} expected={row.quotientBit} marked={marked} onChange={(value) => onChange(idFor("deel", key, index, "quotient"), value)} />)}</div></div><div className="long-sheet__legend"><b>LILA: bou die heelgetal deel van links na regs.</b><b>GROEN: hou die nuwe res vir die volgende ry.</b></div></section><div className="arithmetic-workbook__table-wrap"><table className="arithmetic-workbook__table arithmetic-workbook__table--longdivide"><thead><tr><th>Stap</th><th>Bring af / huidige deelstuk</th><th>Pas M = {pad(scenario.divisor, 4)} in?</th><th>Werklyn → nuwe res</th></tr></thead><tbody>{rows.map((row, index) => <tr key={row.step}><th>{row.step}</th><td><Input label={`${scenario.label}, ${row.step}, huidige deelstuk`} value={answers[idFor("deel", key, index, "bringDown")] ?? ""} expected={row.bringDown} marked={marked} onChange={(value) => onChange(idFor("deel", key, index, "bringDown"), value)} /></td><td><select aria-label={`${scenario.label}, ${row.step}, pas deler in`} className={marked ? (correct(index, "decision", row.decision) ? "correct" : "wrong") : ""} value={answers[idFor("deel", key, index, "decision")] ?? ""} onChange={(event) => onChange(idFor("deel", key, index, "decision"), event.target.value)}><option value="">Kies</option><option value="NEE">NEE → skryf 0</option><option value="JA">JA → skryf 1 en trek af</option></select></td><td><div className="longdivide__work"><span>nuwe res</span><Input label={`${scenario.label}, ${row.step}, nuwe res`} value={answers[idFor("deel", key, index, "remainder")] ?? ""} expected={row.remainder} marked={marked} onChange={(value) => onChange(idFor("deel", key, index, "remainder"), value)} />{marked && (!correct(index, "bringDown", row.bringDown) || !correct(index, "decision", row.decision) || !correct(index, "quotient", row.quotientBit) || !correct(index, "remainder", row.remainder)) ? <small><b>{row.operation}</b> — Q-bis: {row.quotientBit}.</small> : null}</div></td></tr>)}</tbody></table></div>{marked ? <div className="arithmetic-workbook__long-result"><span>HEELGETAL DEEL</span><strong>{pad(quotient, 8)}₂ = {quotient}</strong><span>RES</span><strong>{pad(remainder, 4)}₂ = {remainder}</strong></div> : null}</div>;
 }
