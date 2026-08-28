@@ -40,3 +40,8 @@
 .le6-moved-concepts table{width:100%;margin:.5rem 0;border-collapse:collapse;font-size:.62rem}.le6-moved-concepts th,.le6-moved-concepts td{border:1px solid #D7CBB5;padding:.3rem;text-align:center}.le6-moved-concepts th{background:#F7EAD8;color:#85501C;font:600 .52rem/1 "IBM Plex Mono",monospace}
 .le6-moved-concepts button{display:inline-flex;align-items:center;gap:.3rem;border:1px solid #B94437;background:#fff;padding:.38rem .5rem;color:#A53A2E;font-size:.65rem;font-weight:700}.le6-moved-concepts article:last-child button{border-color:#C17832;color:#9B5C1B}.le6-moved-concepts ol{margin:.55rem 0 0;padding-left:1.15rem;color:#5E524B;font-size:.69rem;line-height:1.45}.le6-moved-concepts__answer strong{color:#B94437}
 @media(max-width:760px){.le6-moved-concepts{grid-template-columns:1fr}}
+
+/* LE2: DELING bly onder die skets, maar strek oor twee van die drie boksbreedtes. */
+.integer-calculation__blocks>.integer-division-examples-slot{grid-column:span 2;min-width:0}
+.integer-calculation__blocks>.integer-division-examples-slot>.integer-division-theory{width:100%;box-sizing:border-box}
+@media(max-width:760px){.integer-calculation__blocks>.integer-division-examples-slot{grid-column:1/-1}}
