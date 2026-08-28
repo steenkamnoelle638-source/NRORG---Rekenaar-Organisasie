@@ -31,7 +31,7 @@ const divisionScenarios: DivisionScenario[] = [
 const pad = (value: number, length: number) => value.toString(2).padStart(length, "0");
 const compact = (value: string) => value.toLowerCase().replace(/[\s.,;:()→←=]/g, "");
 const actionOptions = ["Oorspronklike waardes", "Q₀ = 0; skuif C–A–Q regs", "Q₀ = 1; A + M, skuif C–A–Q regs"];
-const divisionReferenceSketch = "/manus-storage/le2-147-deur-11-langdeling_4246cf5a.png";
+const divisionReferenceSketch = "assets/le2-147-deur-11-langdeling-gesny.png";
 
 function multiplicationRows({ multiplicand, multiplier }: MultiplicationScenario): MultiplicationRow[] {
   let carry = 0;

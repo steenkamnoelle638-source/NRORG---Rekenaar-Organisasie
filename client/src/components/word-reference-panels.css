@@ -4,3 +4,46 @@
 .word-le3-examples>div{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#CDD5DF}.word-le3-examples article{padding:.8rem;background:#FFFCF6}.word-le3-examples h4{margin:0;color:#397445;font:1rem/1.1 "DM Serif Display",Georgia,serif}.word-le3-examples button{display:flex;align-items:center;gap:.35rem;margin-top:.6rem;border:1px solid #4A8B58;background:#fff;padding:.4rem .55rem;color:#397445;font-size:.68rem;font-weight:700}.word-le3-examples pre{overflow:auto;margin:.6rem 0 0;background:#F1F8EF;padding:.55rem;color:#386246;font:500 .66rem/1.45 "IBM Plex Mono",monospace}.ias-tka-word table{width:100%;border-collapse:collapse;font-size:.73rem}.ias-tka-word th,.ias-tka-word td{border:1px solid #BFC8D2;padding:.5rem;vertical-align:top}.ias-tka-word th{background:#E7EFFC;color:#1E477C;font:600 .58rem/1.2 "IBM Plex Mono",monospace}.ias-tka-word td:first-child{background:#F5F7FA;color:#0B4FCE;font-weight:700}@media(max-width:720px){.word-le3-examples>div{grid-template-columns:1fr}.ias-tka-word table{min-width:680px}}
 .ias-tka-word__questions{display:grid;gap:.5rem;padding:1rem 1.2rem}.ias-tka-word details{border:1px solid #C6D3E5;background:#FFFDF8}.ias-tka-word summary{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.7rem;color:#17478E;cursor:pointer;font-weight:700;font-size:.75rem;list-style:none}.ias-tka-word summary::-webkit-details-marker{display:none}.ias-tka-word details[open] summary{border-bottom:1px solid #C6D3E5;background:#EEF4FE}.ias-tka-word details[open] summary svg{transform:rotate(180deg)}.ias-tka-word details>div{padding:.6rem}.ias-tka-word details b{color:#B94437}@media(max-width:720px){.ias-tka-word__questions{padding:.8rem}.ias-tka-word table{min-width:650px}}
 .fixed-point-word>button{display:flex;align-items:center;gap:.35rem;margin:1rem 1.2rem 0;border:1px solid #C17832;background:#FFF8EF;padding:.5rem .65rem;color:#915416;font-size:.7rem;font-weight:700}.fixed-point-word>div{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;padding:1rem 1.2rem}.fixed-point-word pre{overflow:auto;margin:0;border-left:3px solid #C17832;background:#FFF7EC;padding:.7rem;color:#74491F;font:500 .66rem/1.48 "IBM Plex Mono",monospace}@media(max-width:620px){.fixed-point-word>div{grid-template-columns:1fr}.fixed-point-word>button{margin-left:.8rem}.fixed-point-word>div{padding:.8rem}}
+
+/* Word-dokument herstelwerk: IEE-stappe, IAS-groep en ruim aftreknotas. */
+.word-subtraction{grid-template-columns:1fr}
+.word-subtraction aside{border-left:0;border-top:4px solid #B94437}
+.fixed-point-word__steps{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin:0;padding:1rem 1.2rem;list-style:none}
+.fixed-point-word__steps li{display:grid;grid-template-columns:25px 1fr;gap:.45rem;align-items:start;border:1px solid #E2CBAE;background:#FFF9F0;padding:.55rem;color:#5F554A;font-size:.72rem;line-height:1.35}
+.fixed-point-word__steps li>b,.fixed-point-example ol li>b{display:grid;width:22px;height:22px;place-items:center;background:#C17832;color:#fff;font:600 .56rem/1 "IBM Plex Mono",monospace}
+.fixed-point-word__steps li>div{display:grid;gap:.18rem}
+.fixed-point-word__steps strong,.fixed-point-example strong{color:#754A20;font-size:.76rem}
+.fixed-point-word__steps code,.fixed-point-example code{display:block;color:#0B4FCE;font:600 .64rem/1.35 "IBM Plex Mono",monospace}
+.fixed-point-word__ieee{display:grid;gap:.45rem;margin:0;padding:0 1.2rem 1rem}
+.fixed-point-word__ieee img{display:block;width:100%;max-height:350px;object-fit:contain;border:1px solid #C5C6C1;background:#fff}
+.fixed-point-word__ieee figcaption{color:#647080;font-size:.69rem;line-height:1.35}
+.fixed-point-word__ieee figcaption b{color:#B25A1B}
+.fixed-point-examples{display:grid!important;grid-template-columns:1fr 1fr!important;gap:.7rem!important;padding:1rem 1.2rem!important}
+.fixed-point-example{border:1px solid #E3C79D;background:#FFFCF5;padding:.7rem}
+.fixed-point-example h4{margin:0 0 .6rem;color:#754A20;font:1rem/1 "DM Serif Display",Georgia,serif}
+.fixed-point-example ol{display:grid;gap:.35rem;margin:0;padding:0;list-style:none}
+.fixed-point-example ol li{display:grid;grid-template-columns:23px 1fr;gap:.45rem;align-items:start;color:#5D574E;font-size:.69rem;line-height:1.33}
+.fixed-point-example__components{margin-top:.6rem}
+.fixed-point-example__components>b{color:#754A20;font-size:.71rem}
+.fixed-point-example__components table{width:100%;margin-top:.35rem;border-collapse:collapse;font-size:.62rem}
+.fixed-point-example__components th,.fixed-point-example__components td{border:1px solid #D8C6AC;padding:.35rem;text-align:left}
+.fixed-point-example__components th{background:#F3E7D5;color:#754A20;font:600 .54rem/1 "IBM Plex Mono",monospace}
+.fixed-point-example__components td{word-break:break-all}
+.fixed-point-example p{display:grid;gap:.18rem;margin:.45rem 0 0;color:#5F554A;font-size:.68rem}
+.ias-structure-integrations{display:grid;gap:.8rem;border-bottom:1px solid #D8D0C1;background:#F7FBFF;padding:1rem}
+.ias-structure-integrations>header{border-left:4px solid #0B4FCE;padding:.1rem 0 .1rem .75rem}
+.ias-structure-integrations>header span{color:#0B4FCE;font:600 .55rem/1 "IBM Plex Mono",monospace;letter-spacing:.08em}
+.ias-structure-integrations>header h3{margin:.35rem 0;color:#183E74;font:1.4rem/1.05 "DM Serif Display",Georgia,serif}
+.ias-structure-integrations>header p{max-width:780px;margin:0;color:#566474;font-size:.76rem;line-height:1.4}
+.ias-structure-integrations .word-panel{margin:0;border-top-color:#0B4FCE}
+.cache-core .word-panel{margin:1rem 0 0;border-top-color:#4A8B58}
+.cache-core .word-panel>header span{color:#397445}
+.cache-core .word-panel>header h3{font-size:1.12rem}
+@media(max-width:760px){.fixed-point-word__steps,.fixed-point-examples{grid-template-columns:1fr!important}.fixed-point-word__ieee{padding:0 .8rem .8rem}.fixed-point-word__steps{padding:.8rem}.fixed-point-word__ieee img{max-height:280px}.ias-structure-integrations{padding:.8rem}}
+
+/* LE6: die vier Word/TKA-paneelgroepe behoort binne die ruim VERWERKER SPOED-kaart. */
+.le6-topic-grid>.le6-topic--blue{grid-column:1/-1}
+.le6-verwerker-slot .le6-verwerker-integrations{display:grid;gap:.8rem;margin-top:1rem}
+.le6-verwerker-slot .word-panel{margin:0;border-top-color:#0B4FCE;background:#FFFCF6}
+.le6-verwerker-slot .word-panel>header h3{font-size:1.28rem}
+@media(max-width:1080px){.le6-topic-grid>.le6-topic--blue{grid-column:auto}}

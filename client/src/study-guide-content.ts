@@ -34,7 +34,7 @@ export const summaryUnits: SummaryUnit[] = [
     title: "Getallestelsels",
     points: 5,
     focus: "Desimaal ↔ binêr, heksadesimaal ↔ binêr, en breukdele.",
-    sourceImage: "/manus-storage/le1-omskakeling_6b792113.png",
+    sourceImage: "assets/le1-omskakeling_6b792113.png",
     sourceCaption: "Klasverwysing: omskakeling tussen binêr en desimaal.",
     cards: [
       {
@@ -75,7 +75,7 @@ export const summaryUnits: SummaryUnit[] = [
     title: "Rekenaarrekenkunde",
     points: 21,
     focus: "Twee-komplement, bislengte, oorloop, vermenigvuldiging en aftrekregisters.",
-    sourceImage: "/manus-storage/le2-twee-komplement_c09a425d.png",
+    sourceImage: "assets/le2-twee-komplement_c09a425d.png",
     sourceCaption: "Klasverwysing: optelling van twee getalle in twee-komplementvoorstelling.",
     cards: [
       {
@@ -165,7 +165,7 @@ export const summaryUnits: SummaryUnit[] = [
     title: "Basiese konsepte en IAS",
     points: 15,
     focus: "Struktuur/funksie, argitektuur/organisasie, IAS en geheueskyfies/modules.",
-    sourceImage: "/manus-storage/le5-ias-struktuur_decb911b.png",
+    sourceImage: "assets/le5-ias-struktuur_decb911b.png",
     sourceCaption: "Klasverwysing: IAS Struktuur I met geheue-, CPU- en toevoer/afvoerpaadjies.",
     cards: [
       {
@@ -216,7 +216,7 @@ export const summaryUnits: SummaryUnit[] = [
     title: "Prestasie-kwessies",
     points: 10,
     focus: "Pyplyn, vertakkingvoorspelling, datavloei, superskalêr, spekulatief, meerkern en GPU.",
-    sourceImage: "/manus-storage/le6-verwerkerprestasie_7697d0fb.png",
+    sourceImage: "assets/le6-verwerkerprestasie_7697d0fb.png",
     sourceCaption: "Klasverwysing: verwerkerspoed en die relevante verbeteringstegnieke.",
     cards: [
       {
