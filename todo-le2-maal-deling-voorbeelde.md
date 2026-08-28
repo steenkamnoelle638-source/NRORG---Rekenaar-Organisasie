@@ -5,8 +5,8 @@
 - [x] Voeg ’n DELING-afdeling met twee voorbeelde in die gegewe Word-langdelingformaat by.
 - [x] Behou die bestaande selfnasienbare maal- en delingsoefeninge en responsiewe uitleg.
 - [x] Toets bou en rekenaar-/selfoonuitleg.
-- [ ] Sinchroniseer die nuwe bron en statiese Pages-pakket met GitHub.
-- [ ] Skep ’n nuwe checkpoint ná volledige toetsing.
+- [x] Sinchroniseer die nuwe bron en statiese Pages-pakket met GitHub.
+- [x] Skep ’n nuwe checkpoint ná volledige toetsing.
 
 ## Inhoud om te bevestig
 
