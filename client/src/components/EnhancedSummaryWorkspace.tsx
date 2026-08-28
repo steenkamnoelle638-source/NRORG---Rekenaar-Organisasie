@@ -7,61 +7,2481 @@ import { Button } from "@/components/ui/button";
 import "./enhanced-summary.css";
 import "./enhanced-summary-review.css";
 import "./theory-fill.css";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { LearningSketch, UnitExercises } from "@/components/SummaryTools";
-import { WordReferencePanels, WordSubtraction } from "@/components/WordReferencePanels";
+import {
+  WordReferencePanels,
+  WordSubtraction,
+} from "@/components/WordReferencePanels";
 import { summaryUnits, type SummaryUnit } from "@/study-guide-content";
-import { ArrowDown, ArrowLeft, ArrowRight, Check, ChevronDown, CircleHelp, Cpu, Maximize2, Play, RotateCcw } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  CircleHelp,
+  Cpu,
+  Maximize2,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 import { useState } from "react";
 
-function cx(...values: Array<string | boolean | undefined>) { return values.filter(Boolean).join(" "); }
-function normalise(value: string) { return value.toUpperCase().replaceAll(" ", "").replaceAll(",", ".").trim(); }
+function cx(...values: Array<string | boolean | undefined>) {
+  return values.filter(Boolean).join(" ");
+}
+function normalise(value: string) {
+  return value.toUpperCase().replaceAll(" ", "").replaceAll(",", ".").trim();
+}
 
-const topicDrills: Record<string, { prompt: string; answer: string; note: string }[]> = {
-  le1: [{ prompt: "1010 0111₂ → ₁₆", answer: "A7", note: "Groepeer 1010=A en 0111=7." }, { prompt: "1111₂ → ₁₀", answer: "15", note: "8+4+2+1 = 15." }, { prompt: "7B₁₆ → ₂", answer: "01111011", note: "7=0111 en B=1011." }, { prompt: "0,5₁₀ → ₂", answer: "0.1", note: "0,5×2=1,0; die eerste bis is 1." }, { prompt: "36₁₀ → ₂", answer: "100100", note: "32+4 = 36." }],
-  le2: [{ prompt: "Grootste 4-bis unsigned getal", answer: "15", note: "1111₂ = 8+4+2+1 = 15." }, { prompt: "Kleinste 4-bis unsigned getal", answer: "0", note: "0000₂ = 0." }, { prompt: "−3 in 4-bis twee-komplement", answer: "1101", note: "+3=0011 → 1100 → +1 = 1101." }, { prompt: "4-bis teken-en-omvang: grootste positiewe", answer: "7", note: "Een bis wys teken; drie magnitudebisse gee 111₂ = 7." }, { prompt: "0111 + 0001: signed overflow?", answer: "ja", note: "Twee positiewe insette gee 1000 (negatief)." }],
-  le3: [{ prompt: "AND: 1 EN 0", answer: "0", note: "AND gee net 1 wanneer albei insette 1 is." }, { prompt: "XOR: 1 XOF 1", answer: "0", note: "XOR gee 1 wanneer insette verskil." }, { prompt: "Halwe opteller: 1+1 se dra", answer: "1", note: "Dra = A AND B." }, { prompt: "Volopteller se derde inset", answer: "cin", note: "Cin is die carry-in/dra-inset." }, { prompt: "Stroombaan wat toestand hou", answer: "wipkring", note: "Terugvoer gee geheue/toestand." }],
-  le5: [{ prompt: "Argitektuur vra hoofsaaklik", answer: "wat", note: "Argitektuur = WAT ’n programmeerder kan sien." }, { prompt: "Organisasie vra hoofsaaklik", answer: "hoe", note: "Organisasie = HOE dit intern gebou/uitgevoer word." }, { prompt: "IAS-woordlengte", answer: "40", note: "Een IAS-geheuewoord is 40 bisse." }, { prompt: "Register vir geheue-adres", answer: "mar", note: "MAR = Memory Address Register." }, { prompt: "Kasgeheue is tussen", answer: "cpu en hoofgeheue", note: "Dit verminder wagtyd vir gereeld gebruikte data/instruksies." }],
-  le6: [{ prompt: "Pyplynstadium wat instruksie haal", answer: "gh", note: "GH = Gaan Haal." }, { prompt: "Pyplynstadium wat instruksie uitvoer", answer: "uv", note: "UV = Uitvoer." }, { prompt: "Pyplyn verhoog hoofsaaklik", answer: "deurset", note: "Oorvleueling laat meer instruksies per tyd voltooi." }, { prompt: "Straf = aantal foute ×", answer: "sikluskoste", note: "Vertakkingstraf gebruik die gegewe koste per fout." }, { prompt: "GPU pas by", answer: "parallelle data", note: "Baie soortgelyke berekeninge oor groot datastelle." }],
+const topicDrills: Record<
+  string,
+  { prompt: string; answer: string; note: string }[]
+> = {
+  le1: [
+    {
+      prompt: "1010 0111₂ → ₁₆",
+      answer: "A7",
+      note: "Groepeer 1010=A en 0111=7.",
+    },
+    { prompt: "1111₂ → ₁₀", answer: "15", note: "8+4+2+1 = 15." },
+    { prompt: "7B₁₆ → ₂", answer: "01111011", note: "7=0111 en B=1011." },
+    {
+      prompt: "0,5₁₀ → ₂",
+      answer: "0.1",
+      note: "0,5×2=1,0; die eerste bis is 1.",
+    },
+    { prompt: "36₁₀ → ₂", answer: "100100", note: "32+4 = 36." },
+  ],
+  le2: [
+    {
+      prompt: "Grootste 4-bis unsigned getal",
+      answer: "15",
+      note: "1111₂ = 8+4+2+1 = 15.",
+    },
+    {
+      prompt: "Kleinste 4-bis unsigned getal",
+      answer: "0",
+      note: "0000₂ = 0.",
+    },
+    {
+      prompt: "−3 in 4-bis twee-komplement",
+      answer: "1101",
+      note: "+3=0011 → 1100 → +1 = 1101.",
+    },
+    {
+      prompt: "4-bis teken-en-omvang: grootste positiewe",
+      answer: "7",
+      note: "Een bis wys teken; drie magnitudebisse gee 111₂ = 7.",
+    },
+    {
+      prompt: "0111 + 0001: signed overflow?",
+      answer: "ja",
+      note: "Twee positiewe insette gee 1000 (negatief).",
+    },
+  ],
+  le3: [
+    {
+      prompt: "AND: 1 EN 0",
+      answer: "0",
+      note: "AND gee net 1 wanneer albei insette 1 is.",
+    },
+    {
+      prompt: "XOR: 1 XOF 1",
+      answer: "0",
+      note: "XOR gee 1 wanneer insette verskil.",
+    },
+    {
+      prompt: "Halwe opteller: 1+1 se dra",
+      answer: "1",
+      note: "Dra = A AND B.",
+    },
+    {
+      prompt: "Volopteller se derde inset",
+      answer: "cin",
+      note: "Cin is die carry-in/dra-inset.",
+    },
+    {
+      prompt: "Stroombaan wat toestand hou",
+      answer: "wipkring",
+      note: "Terugvoer gee geheue/toestand.",
+    },
+  ],
+  le5: [
+    {
+      prompt: "Argitektuur vra hoofsaaklik",
+      answer: "wat",
+      note: "Argitektuur = WAT ’n programmeerder kan sien.",
+    },
+    {
+      prompt: "Organisasie vra hoofsaaklik",
+      answer: "hoe",
+      note: "Organisasie = HOE dit intern gebou/uitgevoer word.",
+    },
+    {
+      prompt: "IAS-woordlengte",
+      answer: "40",
+      note: "Een IAS-geheuewoord is 40 bisse.",
+    },
+    {
+      prompt: "Register vir geheue-adres",
+      answer: "mar",
+      note: "MAR = Memory Address Register.",
+    },
+    {
+      prompt: "Kasgeheue is tussen",
+      answer: "cpu en hoofgeheue",
+      note: "Dit verminder wagtyd vir gereeld gebruikte data/instruksies.",
+    },
+  ],
+  le6: [
+    {
+      prompt: "Pyplynstadium wat instruksie haal",
+      answer: "gh",
+      note: "GH = Gaan Haal.",
+    },
+    {
+      prompt: "Pyplynstadium wat instruksie uitvoer",
+      answer: "uv",
+      note: "UV = Uitvoer.",
+    },
+    {
+      prompt: "Pyplyn verhoog hoofsaaklik",
+      answer: "deurset",
+      note: "Oorvleueling laat meer instruksies per tyd voltooi.",
+    },
+    {
+      prompt: "Straf = aantal foute ×",
+      answer: "sikluskoste",
+      note: "Vertakkingstraf gebruik die gegewe koste per fout.",
+    },
+    {
+      prompt: "GPU pas by",
+      answer: "parallelle data",
+      note: "Baie soortgelyke berekeninge oor groot datastelle.",
+    },
+  ],
 };
 
-const theoryPanels: Record<string, { heading: string; subtitle: string; groups: { title: string; color: string; rows: { term: string; detail: string }[] }[] }> = {
-  le1: { heading: "Teorie: getallestelsels", subtitle: "Lees eers die basis, posisiewaarde en groeperingsreël. Gebruik dan die metodekaart.", groups: [{ title: "BASIS EN POSISIEWAARDE", color: "blue", rows: [{ term: "Binêr (basis 2)", detail: "Gebruik slegs 0 en 1. Elke plek links van die punt is ’n volgende mag van 2." }, { term: "Heksadesimaal (basis 16)", detail: "Gebruik 0–9 en A–F. Een hex-syfer is altyd presies vier bisse." }] }, { title: "OMSKAKELING", color: "green", rows: [{ term: "Heelgetal", detail: "Desimaal → binêr: deel deur 2 en lees reste van onder na bo." }, { term: "Breukdeel", detail: "Vermenigvuldig die breukdeel met 2 en lees die heelgetaldele van bo na onder." }] }] },
-  le2: { heading: "Teorie: Heelgetalvoorstelling en heelgetalberekening", subtitle: "Hou die bislengte konstant. Lees altyd die tekenreël voordat jy ’n resultaat as korrek aanvaar.", groups: [{ title: "HEELGETALVOORSTELLING", color: "red", rows: [{ term: "Unsigned 4 bis", detail: "0000 is die kleinste waarde (0). 1111 is die grootste waarde (8+4+2+1 = 15), dus 2⁴−1." }, { term: "Teken en omvang", detail: "Die heel linkerste bis is die teken: 0 positief, 1 negatief. Drie magnitudebisse gee 0–7; dus die reeks is −7 tot +7 (met twee nulle)." }, { term: "Twee-komplement", detail: "Met 4 bisse is die reeks −8 tot +7. 1000 is −8; 0111 is +7. Daar is net een nul en daarom een ekstra negatiewe waarde." }, { term: "Bis-lengte uitbreiding", detail: "Unsigned: voeg nulle links by. Getekend/twee-komplement: herhaal die tekenbis links (tekenuitbreiding)." }] }, { title: "HEELGETALBEREKENING", color: "orange", rows: [{ term: "Optel", detail: "Tel bisse van regs na links en dra waar nodig. Met twee-komplement volg dieselfde opteller die rekenwerk." }, { term: "Oorloopreël", detail: "Wanneer twee insette met dieselfde teken ’n resultaat met die teenoorgestelde teken gee, is daar signed overflow." }, { term: "Aftrek", detail: "A−B word A + (twee-komplement van B). Hou net die vaste-bislengte resultaat." }] }] },
-  le3: { heading: "Teorie: Logika, optellers en toestand", subtitle: "Groepeer eers hekke en kombinasionele stroombane; groepeer daarna wipkringe as sequentiële geheue-eenhede.", groups: [{ title: "KOMBINASIONELE LOGIKA", color: "blue", rows: [{ term: "Hek", detail: "’n Logiese hek vorm ’n uitset uit huidige insette; daar is geen vorige toestand nie." }, { term: "Halwe opteller", detail: "Tel A en B. Som = A XOR B; Dra = A AND B." }, { term: "Volopteller", detail: "Tel A, B én Cin. Dit kan uit twee halwe optellers en ’n OR-hek gebou word." }] }, { title: "SEQUENSIËLE LOGIKA", color: "green", rows: [{ term: "Houwipkring", detail: "’n Basiese bistabiele geheue-element met terugvoer wat toestand kan vashou." }, { term: "Wipkring", detail: "’n Beheerde geheue-element wat toestand volgens ’n inset/klokgedrag verander." }] }] },
-  le5: { heading: "ARGITEKTUUR & ORGANISASIE", subtitle: "Skei die programmeerder-sigbare WAT van die interne implementasie-HOE voordat jy na struktuur, funksie en IAS beweeg.", groups: [{ title: "ARGITEKTUUR / WAT?", color: "red", rows: [{ term: "Wat is sigbaar?", detail: "Instruksiestel, dataformate, registertipes en adresseerbare geheue—eienskappe wat ’n programmeerder kan waarneem en gebruik." }, { term: "Wie gebruik dit?", detail: "Die programmeerder en samesteller; hulle sien die instruksies en hulpbronne wat die stelsel bied." }] }, { title: "ORGANISASIE / HOE?", color: "blue", rows: [{ term: "Hoe werk dit intern?", detail: "Datapaaie, beheerseine, geheuetegnologie en die konkrete koppeling van die fisiese eenhede." }, { term: "Wie bou dit?", detail: "Rekenaarontwerpers bepaal hoe die sigbare argitektuur werklik geïmplementeer word." }] }] },
-  le6: { heading: "Teorie: Ontwerp vir prestasie", subtitle: "Skei deurset, wagtyd en parallelisme. Elke term los ’n ander bottelnek op.", groups: [{ title: "VERWERKER SPOED", color: "blue", rows: [{ term: "Pyplyn", detail: "Oorvleuel GH, DE en UV om deurset te verhoog." }, { term: "Vertakkingvoorspelling", detail: "Raai die pad vooraf; ’n fout vereis herstelwerk en kos siklusse." }, { term: "Datavloei", detail: "Soek onafhanklike instruksies; afhanklike instruksies kan nie sommer saam uitvoer nie." }] }, { title: "SKYFIE EN PARALLELISME", color: "green", rows: [{ term: "Superskalêr", detail: "Meer as een onafhanklike instruksie kan per siklus na verskillende uitvoeringseenhede gaan." }, { term: "Spekulatief", detail: "Voer werk op ’n waarskynlike pad vooruit uit; herstel indien die voorspelling verkeerd was." }, { term: "Meerkern / GPU", detail: "Meerkern: verskeie algemene kerne. GPU: baie eenvoudige parallelle berekeninge oor groot data." }] }] },
+const theoryPanels: Record<
+  string,
+  {
+    heading: string;
+    subtitle: string;
+    groups: {
+      title: string;
+      color: string;
+      rows: { term: string; detail: string }[];
+    }[];
+  }
+> = {
+  le1: {
+    heading: "Teorie: getallestelsels",
+    subtitle:
+      "Lees eers die basis, posisiewaarde en groeperingsreël. Gebruik dan die metodekaart.",
+    groups: [
+      {
+        title: "BASIS EN POSISIEWAARDE",
+        color: "blue",
+        rows: [
+          {
+            term: "Binêr (basis 2)",
+            detail:
+              "Gebruik slegs 0 en 1. Elke plek links van die punt is ’n volgende mag van 2.",
+          },
+          {
+            term: "Heksadesimaal (basis 16)",
+            detail:
+              "Gebruik 0–9 en A–F. Een hex-syfer is altyd presies vier bisse.",
+          },
+        ],
+      },
+      {
+        title: "OMSKAKELING",
+        color: "green",
+        rows: [
+          {
+            term: "Heelgetal",
+            detail:
+              "Desimaal → binêr: deel deur 2 en lees reste van onder na bo.",
+          },
+          {
+            term: "Breukdeel",
+            detail:
+              "Vermenigvuldig die breukdeel met 2 en lees die heelgetaldele van bo na onder.",
+          },
+        ],
+      },
+    ],
+  },
+  le2: {
+    heading: "Teorie: Heelgetalvoorstelling en heelgetalberekening",
+    subtitle:
+      "Hou die bislengte konstant. Lees altyd die tekenreël voordat jy ’n resultaat as korrek aanvaar.",
+    groups: [
+      {
+        title: "HEELGETALVOORSTELLING",
+        color: "red",
+        rows: [
+          {
+            term: "Unsigned 4 bis",
+            detail:
+              "0000 is die kleinste waarde (0). 1111 is die grootste waarde (8+4+2+1 = 15), dus 2⁴−1.",
+          },
+          {
+            term: "Teken en omvang",
+            detail:
+              "Die heel linkerste bis is die teken: 0 positief, 1 negatief. Drie magnitudebisse gee 0–7; dus die reeks is −7 tot +7 (met twee nulle).",
+          },
+          {
+            term: "Twee-komplement",
+            detail:
+              "Met 4 bisse is die reeks −8 tot +7. 1000 is −8; 0111 is +7. Daar is net een nul en daarom een ekstra negatiewe waarde.",
+          },
+          {
+            term: "Bis-lengte uitbreiding",
+            detail:
+              "Unsigned: voeg nulle links by. Getekend/twee-komplement: herhaal die tekenbis links (tekenuitbreiding).",
+          },
+        ],
+      },
+      {
+        title: "HEELGETALBEREKENING",
+        color: "orange",
+        rows: [
+          {
+            term: "Optel",
+            detail:
+              "Tel bisse van regs na links en dra waar nodig. Met twee-komplement volg dieselfde opteller die rekenwerk.",
+          },
+          {
+            term: "Oorloopreël",
+            detail:
+              "Wanneer twee insette met dieselfde teken ’n resultaat met die teenoorgestelde teken gee, is daar signed overflow.",
+          },
+          {
+            term: "Aftrek",
+            detail:
+              "A−B word A + (twee-komplement van B). Hou net die vaste-bislengte resultaat.",
+          },
+        ],
+      },
+    ],
+  },
+  le3: {
+    heading: "Teorie: Logika, optellers en toestand",
+    subtitle:
+      "Groepeer eers hekke en kombinasionele stroombane; groepeer daarna wipkringe as sequentiële geheue-eenhede.",
+    groups: [
+      {
+        title: "KOMBINASIONELE LOGIKA",
+        color: "blue",
+        rows: [
+          {
+            term: "Hek",
+            detail:
+              "’n Logiese hek vorm ’n uitset uit huidige insette; daar is geen vorige toestand nie.",
+          },
+          {
+            term: "Halwe opteller",
+            detail: "Tel A en B. Som = A XOR B; Dra = A AND B.",
+          },
+          {
+            term: "Volopteller",
+            detail:
+              "Tel A, B én Cin. Dit kan uit twee halwe optellers en ’n OR-hek gebou word.",
+          },
+        ],
+      },
+      {
+        title: "SEQUENSIËLE LOGIKA",
+        color: "green",
+        rows: [
+          {
+            term: "Houwipkring",
+            detail:
+              "’n Basiese bistabiele geheue-element met terugvoer wat toestand kan vashou.",
+          },
+          {
+            term: "Wipkring",
+            detail:
+              "’n Beheerde geheue-element wat toestand volgens ’n inset/klokgedrag verander.",
+          },
+        ],
+      },
+    ],
+  },
+  le5: {
+    heading: "ARGITEKTUUR & ORGANISASIE",
+    subtitle:
+      "Skei die programmeerder-sigbare WAT van die interne implementasie-HOE voordat jy na struktuur, funksie en IAS beweeg.",
+    groups: [
+      {
+        title: "ARGITEKTUUR / WAT?",
+        color: "red",
+        rows: [
+          {
+            term: "Wat is sigbaar?",
+            detail:
+              "Instruksiestel, dataformate, registertipes en adresseerbare geheue—eienskappe wat ’n programmeerder kan waarneem en gebruik.",
+          },
+          {
+            term: "Wie gebruik dit?",
+            detail:
+              "Die programmeerder en samesteller; hulle sien die instruksies en hulpbronne wat die stelsel bied.",
+          },
+        ],
+      },
+      {
+        title: "ORGANISASIE / HOE?",
+        color: "blue",
+        rows: [
+          {
+            term: "Hoe werk dit intern?",
+            detail:
+              "Datapaaie, beheerseine, geheuetegnologie en die konkrete koppeling van die fisiese eenhede.",
+          },
+          {
+            term: "Wie bou dit?",
+            detail:
+              "Rekenaarontwerpers bepaal hoe die sigbare argitektuur werklik geïmplementeer word.",
+          },
+        ],
+      },
+    ],
+  },
+  le6: {
+    heading: "Teorie: Ontwerp vir prestasie",
+    subtitle:
+      "Skei deurset, wagtyd en parallelisme. Elke term los ’n ander bottelnek op.",
+    groups: [
+      {
+        title: "VERWERKER SPOED",
+        color: "blue",
+        rows: [
+          {
+            term: "Pyplyn",
+            detail: "Oorvleuel GH, DE en UV om deurset te verhoog.",
+          },
+          {
+            term: "Vertakkingvoorspelling",
+            detail:
+              "Raai die pad vooraf; ’n fout vereis herstelwerk en kos siklusse.",
+          },
+          {
+            term: "Datavloei",
+            detail:
+              "Soek onafhanklike instruksies; afhanklike instruksies kan nie sommer saam uitvoer nie.",
+          },
+        ],
+      },
+      {
+        title: "SKYFIE EN PARALLELISME",
+        color: "green",
+        rows: [
+          {
+            term: "Superskalêr",
+            detail:
+              "Meer as een onafhanklike instruksie kan per siklus na verskillende uitvoeringseenhede gaan.",
+          },
+          {
+            term: "Spekulatief",
+            detail:
+              "Voer werk op ’n waarskynlike pad vooruit uit; herstel indien die voorspelling verkeerd was.",
+          },
+          {
+            term: "Meerkern / GPU",
+            detail:
+              "Meerkern: verskeie algemene kerne. GPU: baie eenvoudige parallelle berekeninge oor groot data.",
+          },
+        ],
+      },
+    ],
+  },
 };
 
-function TheoryPanel({ unitId }: { unitId: string }) { const panel = theoryPanels[unitId]; return <section className="deep-theory"><header><span>TEORIE IN KORT / STRUKTUUR</span><h3>{panel.heading}</h3><p>{panel.subtitle}</p></header><div>{panel.groups.map((group) => <article className={`deep-theory__group deep-theory__group--${group.color}`} key={group.title}><h4>{group.title}</h4>{group.rows.map((row) => <div key={row.term}><b>{row.term}</b><p>{row.detail}</p></div>)}</article>)}</div><TheoryFillExercises unitId={unitId}/></section>; }
-const theoryFills:Record<string,{q:string;a:string;n:string}[]>={le1:[{q:"Een hex-syfer verteenwoordig hoeveel bisse?",a:"4",n:"Een heksadesimale syfer is ’n groep van vier bisse."},{q:"Skakel 1100₂ na heksadesimaal.",a:"C",n:"1100 is die patroon vir C."},{q:"Watter rigting lees jy reste vir desimaal → binêr?",a:"van onder na bo",n:"Deel herhaaldelik deur 2 en lees die reste onder na bo."}],le2:[{q:"Tekenuitbreiding van 1011 na 8 bis.",a:"11111011",n:"Herhaal die linker tekenbis 1."},{q:"Watter tekenpatroon wys signed overflow?",a:"dieselfde teken in teenoorgestelde teken uit",n:"Die invoere het dieselfde teken, die resultaat die ander teken."},{q:"4-bis twee-komplement se kleinste waarde.",a:"-8",n:"1000₂ verteenwoordig −8."}],le3:[{q:"Halwe opteller: 1+1 se Som (S).",a:"0",n:"S=A XOR B; 1 XOR 1 = 0."},{q:"Halwe opteller: 1+1 se oordrag (C).",a:"1",n:"C=A AND B; 1 AND 1 = 1."},{q:"Volopteller se ekstra inset.",a:"Cin",n:"Cin is die carry-in / dra-inset."}],le5:[{q:"IAS: register wat die volgende geheue-adres hou.",a:"PC",n:"PC wys na die volgende instruksiewoord."},{q:"IAS: register wat die gekose adres na geheue dra.",a:"MAR",n:"MAR hou/stuur die adres vir geheuelees of -skryf."},{q:"Een IAS-geheuewoord se lengte in bisse.",a:"40",n:"Dit bestaan uit twee 20-bis instruksiehelftes."}],le6:[{q:"Pyplyn verhoog hoofsaaklik watter maatstaf?",a:"deurset",n:"Meer instruksies kan per tyd voltooi sonder dat een instruksie se latensie noodwendig verander."},{q:"’n Verkeerde vertakkingvoorspelling veroorsaak ’n …",a:"straf",n:"Die verkeerde pad se werk word herstel/weggegooi."},{q:"Watter eenheid voer imul gewoonlik uit?",a:"VVE",n:"VVE is die vermenigvuldigingseenheid."}]};
-function TheoryFillExercises({unitId}:{unitId:string}){const [v,setV]=useState<Record<number,string>>({});const [mark,setMark]=useState(false);const rows=theoryFills[unitId]??[];return <section className="theory-fill"><header><span>TEORIE / INVULOEFENING</span><b>Toets die nuwe terme direk.</b><button type="button" onClick={()=>setMark(true)}><Check className="size-3.5"/>Merk</button></header>{rows.map((row,i)=>{const ok=normalise(v[i]??"")===normalise(row.a);return <label className={cx(mark&&!ok&&"theory-fill__wrong")} key={row.q}><span>{i+1}</span><b>{row.q}</b><input value={v[i]??""} onChange={e=>{setV({...v,[i]:e.target.value});setMark(false)}} placeholder="Jou antwoord"/>{mark?<em className={ok?"theory-fill__correct":""}>{ok?"Korrek":`${row.a} — ${row.n}`}</em>:null}</label>})}</section>}
+function TheoryPanel({ unitId }: { unitId: string }) {
+  const panel = theoryPanels[unitId];
+  return (
+    <section className="deep-theory">
+      <header>
+        <span>TEORIE IN KORT / STRUKTUUR</span>
+        <h3>{panel.heading}</h3>
+        <p>{panel.subtitle}</p>
+      </header>
+      <div>
+        {panel.groups.map(group => (
+          <article
+            className={`deep-theory__group deep-theory__group--${group.color}`}
+            key={group.title}
+          >
+            <h4>{group.title}</h4>
+            {group.rows.map(row => (
+              <div key={row.term}>
+                <b>{row.term}</b>
+                <p>{row.detail}</p>
+              </div>
+            ))}
+          </article>
+        ))}
+      </div>
+      <TheoryFillExercises unitId={unitId} />
+    </section>
+  );
+}
+const theoryFills: Record<string, { q: string; a: string; n: string }[]> = {
+  le1: [
+    {
+      q: "Een hex-syfer verteenwoordig hoeveel bisse?",
+      a: "4",
+      n: "Een heksadesimale syfer is ’n groep van vier bisse.",
+    },
+    {
+      q: "Skakel 1100₂ na heksadesimaal.",
+      a: "C",
+      n: "1100 is die patroon vir C.",
+    },
+    {
+      q: "Watter rigting lees jy reste vir desimaal → binêr?",
+      a: "van onder na bo",
+      n: "Deel herhaaldelik deur 2 en lees die reste onder na bo.",
+    },
+  ],
+  le2: [
+    {
+      q: "Tekenuitbreiding van 1011 na 8 bis.",
+      a: "11111011",
+      n: "Herhaal die linker tekenbis 1.",
+    },
+    {
+      q: "Watter tekenpatroon wys signed overflow?",
+      a: "dieselfde teken in teenoorgestelde teken uit",
+      n: "Die invoere het dieselfde teken, die resultaat die ander teken.",
+    },
+    {
+      q: "4-bis twee-komplement se kleinste waarde.",
+      a: "-8",
+      n: "1000₂ verteenwoordig −8.",
+    },
+  ],
+  le3: [
+    {
+      q: "Halwe opteller: 1+1 se Som (S).",
+      a: "0",
+      n: "S=A XOR B; 1 XOR 1 = 0.",
+    },
+    {
+      q: "Halwe opteller: 1+1 se oordrag (C).",
+      a: "1",
+      n: "C=A AND B; 1 AND 1 = 1.",
+    },
+    {
+      q: "Volopteller se ekstra inset.",
+      a: "Cin",
+      n: "Cin is die carry-in / dra-inset.",
+    },
+  ],
+  le5: [
+    {
+      q: "IAS: register wat die volgende geheue-adres hou.",
+      a: "PC",
+      n: "PC wys na die volgende instruksiewoord.",
+    },
+    {
+      q: "IAS: register wat die gekose adres na geheue dra.",
+      a: "MAR",
+      n: "MAR hou/stuur die adres vir geheuelees of -skryf.",
+    },
+    {
+      q: "Een IAS-geheuewoord se lengte in bisse.",
+      a: "40",
+      n: "Dit bestaan uit twee 20-bis instruksiehelftes.",
+    },
+  ],
+  le6: [
+    {
+      q: "Pyplyn verhoog hoofsaaklik watter maatstaf?",
+      a: "deurset",
+      n: "Meer instruksies kan per tyd voltooi sonder dat een instruksie se latensie noodwendig verander.",
+    },
+    {
+      q: "’n Verkeerde vertakkingvoorspelling veroorsaak ’n …",
+      a: "straf",
+      n: "Die verkeerde pad se werk word herstel/weggegooi.",
+    },
+    {
+      q: "Watter eenheid voer imul gewoonlik uit?",
+      a: "VVE",
+      n: "VVE is die vermenigvuldigingseenheid.",
+    },
+  ],
+};
+function TheoryFillExercises({ unitId }: { unitId: string }) {
+  const [v, setV] = useState<Record<number, string>>({});
+  const [mark, setMark] = useState(false);
+  const rows = theoryFills[unitId] ?? [];
+  return (
+    <section className="theory-fill">
+      <header>
+        <span>TEORIE / INVULOEFENING</span>
+        <b>Toets die nuwe terme direk.</b>
+        <button type="button" onClick={() => setMark(true)}>
+          <Check className="size-3.5" />
+          Merk
+        </button>
+      </header>
+      {rows.map((row, i) => {
+        const ok = normalise(v[i] ?? "") === normalise(row.a);
+        return (
+          <label
+            className={cx(mark && !ok && "theory-fill__wrong")}
+            key={row.q}
+          >
+            <span>{i + 1}</span>
+            <b>{row.q}</b>
+            <input
+              value={v[i] ?? ""}
+              onChange={e => {
+                setV({ ...v, [i]: e.target.value });
+                setMark(false);
+              }}
+              placeholder="Jou antwoord"
+            />
+            {mark ? (
+              <em className={ok ? "theory-fill__correct" : ""}>
+                {ok ? "Korrek" : `${row.a} — ${row.n}`}
+              </em>
+            ) : null}
+          </label>
+        );
+      })}
+    </section>
+  );
+}
 
-const alternateExamples: Record<string, { title: string; lines: string[] }> = { "decimal-binary": { title: "Voorbeeld B: 37₁₀", lines: ["37 = 32 + 4 + 1.", "Merk 1 onder 32, 4 en 1.", "37₁₀ = 100101₂."] }, "hex-binary": { title: "Voorbeeld B: 3F₁₆", lines: ["3 = 0011 en F = 1111.", "Skryf die twee groepe langs mekaar.", "3F₁₆ = 0011 1111₂."] }, "twos-complement": { title: "Voorbeeld B: −3", lines: ["+3 = 0011.", "Inverseer na 1100.", "Tel 1 by: 1101 = −3."] }, "overflow": { title: "Voorbeeld B: negatiewe oorloop", lines: ["1000 = −8 en 1111 = −1.", "4-bis patroon: 0111.", "Twee negatiewe insette gee positief: oorloop."] }, "caq-m": { title: "Voorbeeld B: 0100 × 0110", lines: ["Begin C=0, A=0000, Q=0110, M=0100.", "Toets Q₀, tel waar nodig en skuif C-A-Q.", "Finale A|Q = 00011000 = 24."] }, "subtract-flow": { title: "Voorbeeld B: 7−4", lines: ["A=0111; B=0100.", "2-komplement(B): 0100 → 1011 → 1100.", "0111 + 1100 = 1 0011 → 0011."] }, "gates": { title: "Voorbeeld B: (A EN B) OF NIE C", lines: ["Bou eers A EN B.", "Voeg die NIE-hek vir C by.", "Koppel albei na die OF-hek."] }, "adders": { title: "Voorbeeld B: 1+1+1", lines: ["A=1, B=1, Cin=1.", "Som=1 en Cout=1.", "1+1+1 = 11₂."] }, "flipflop": { title: "Voorbeeld B: behou toestand", lines: ["Stel Q na 1.", "Maak die beheer-inset onaktief.", "Q bly 1 totdat reset/klok verander."] }, "ias-registers": { title: "Voorbeeld B: begin van gaan haal", lines: ["PC=0.", "MAR ← PC; MBR ← M(MAR).", "IBR hou die regter instruksie."] }, "pipeline": { title: "Voorbeeld B: drie instruksies", lines: ["Siklus 1: I1 in GH.", "Siklus 2: I1 DE; I2 GH.", "Siklus 3: I1 UV; I2 DE; I3 GH."] } };
-function MultiExample({ card, open, onToggle }: { card: SummaryUnit["cards"][number]; open: boolean; onToggle: () => void }) { const alternate = alternateExamples[card.id]; return <><Button variant="outline" className="workbook-button" size="sm" onClick={onToggle}><Play className="size-3.5" />{open ? "Versteek 2 voorbeelde" : "Wys 2 voorbeelde"}</Button>{open ? <div className="deep-card-list__examples"><section className="deep-card-list__example"><b>Voorbeeld A: {card.exampleTitle}</b><ol>{card.exampleSteps.map((step) => <li key={step}>{step}</li>)}</ol></section>{alternate ? <section className="deep-card-list__example"><b>{alternate.title}</b><ol>{alternate.lines.map((line: string) => <li key={line}>{line}</li>)}</ol></section> : null}</div> : null}</>; }
+const alternateExamples: Record<string, { title: string; lines: string[] }> = {
+  "decimal-binary": {
+    title: "Voorbeeld B: 37₁₀",
+    lines: ["37 = 32 + 4 + 1.", "Merk 1 onder 32, 4 en 1.", "37₁₀ = 100101₂."],
+  },
+  "hex-binary": {
+    title: "Voorbeeld B: 3F₁₆",
+    lines: [
+      "3 = 0011 en F = 1111.",
+      "Skryf die twee groepe langs mekaar.",
+      "3F₁₆ = 0011 1111₂.",
+    ],
+  },
+  "twos-complement": {
+    title: "Voorbeeld B: −3",
+    lines: ["+3 = 0011.", "Inverseer na 1100.", "Tel 1 by: 1101 = −3."],
+  },
+  overflow: {
+    title: "Voorbeeld B: negatiewe oorloop",
+    lines: [
+      "1000 = −8 en 1111 = −1.",
+      "4-bis patroon: 0111.",
+      "Twee negatiewe insette gee positief: oorloop.",
+    ],
+  },
+  "caq-m": {
+    title: "Voorbeeld B: 0100 × 0110",
+    lines: [
+      "Begin C=0, A=0000, Q=0110, M=0100.",
+      "Toets Q₀, tel waar nodig en skuif C-A-Q.",
+      "Finale A|Q = 00011000 = 24.",
+    ],
+  },
+  "subtract-flow": {
+    title: "Voorbeeld B: 7−4",
+    lines: [
+      "A=0111; B=0100.",
+      "2-komplement(B): 0100 → 1011 → 1100.",
+      "0111 + 1100 = 1 0011 → 0011.",
+    ],
+  },
+  gates: {
+    title: "Voorbeeld B: (A EN B) OF NIE C",
+    lines: [
+      "Bou eers A EN B.",
+      "Voeg die NIE-hek vir C by.",
+      "Koppel albei na die OF-hek.",
+    ],
+  },
+  adders: {
+    title: "Voorbeeld B: 1+1+1",
+    lines: ["A=1, B=1, Cin=1.", "Som=1 en Cout=1.", "1+1+1 = 11₂."],
+  },
+  flipflop: {
+    title: "Voorbeeld B: behou toestand",
+    lines: [
+      "Stel Q na 1.",
+      "Maak die beheer-inset onaktief.",
+      "Q bly 1 totdat reset/klok verander.",
+    ],
+  },
+  "ias-registers": {
+    title: "Voorbeeld B: begin van gaan haal",
+    lines: [
+      "PC=0.",
+      "MAR ← PC; MBR ← M(MAR).",
+      "IBR hou die regter instruksie.",
+    ],
+  },
+  pipeline: {
+    title: "Voorbeeld B: drie instruksies",
+    lines: [
+      "Siklus 1: I1 in GH.",
+      "Siklus 2: I1 DE; I2 GH.",
+      "Siklus 3: I1 UV; I2 DE; I3 GH.",
+    ],
+  },
+};
+function MultiExample({
+  card,
+  open,
+  onToggle,
+}: {
+  card: SummaryUnit["cards"][number];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const alternate = alternateExamples[card.id];
+  return (
+    <>
+      <Button
+        variant="outline"
+        className="workbook-button"
+        size="sm"
+        onClick={onToggle}
+      >
+        <Play className="size-3.5" />
+        {open ? "Versteek 2 voorbeelde" : "Wys 2 voorbeelde"}
+      </Button>
+      {open ? (
+        <div className="deep-card-list__examples">
+          <section className="deep-card-list__example">
+            <b>Voorbeeld A: {card.exampleTitle}</b>
+            <ol>
+              {card.exampleSteps.map(step => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </section>
+          {alternate ? (
+            <section className="deep-card-list__example">
+              <b>{alternate.title}</b>
+              <ol>
+                {alternate.lines.map((line: string) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+    </>
+  );
+}
 
-function HexPatternTable() { const values = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]; return <section className="topic-insert hex-pattern"><header><span>LE1 / HEKSADESIMAAL</span><h3>Die 4-bis patroon van 0 tot F.</h3><p>Die eerste bis (8) skei 0–7 links van 8–F regs. Elke volgende kolom halveer sy patroon: 4, dan 2, dan 1.</p></header><div className="hex-pattern__grid"><div className="hex-pattern__head"><b>Hex</b><b>8</b><b>4</b><b>2</b><b>1</b></div>{values.map((value, index) => <div className={cx("hex-pattern__row", index < 8 ? "hex-pattern__row--left" : "hex-pattern__row--right")} key={value}><span>{value}</span><i>{index & 8 ? 1 : 0}</i><i>{index & 4 ? 1 : 0}</i><i>{index & 2 ? 1 : 0}</i><i>{index & 1 ? 1 : 0}</i></div>)}</div><div className="hex-pattern__notes"><span><b>8-kolom:</b> 8 nulle, dan 8 ene.</span><span><b>4-kolom:</b> 4 nulle, dan 4 ene—herhaal.</span><span><b>2-kolom:</b> 2 nulle, dan 2 ene—herhaal.</span><span><b>1-kolom:</b> 1 nul, dan 1 een—herhaal.</span></div></section>; }
+function HexPatternTable() {
+  const values = [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+  ];
+  return (
+    <section className="topic-insert hex-pattern">
+      <header>
+        <span>LE1 / HEKSADESIMAAL</span>
+        <h3>Die 4-bis patroon van 0 tot F.</h3>
+        <p>
+          Die eerste bis (8) skei 0–7 links van 8–F regs. Elke volgende kolom
+          halveer sy patroon: 4, dan 2, dan 1.
+        </p>
+      </header>
+      <div className="hex-pattern__grid">
+        <div className="hex-pattern__head">
+          <b>Hex</b>
+          <b>8</b>
+          <b>4</b>
+          <b>2</b>
+          <b>1</b>
+        </div>
+        {values.map((value, index) => (
+          <div
+            className={cx(
+              "hex-pattern__row",
+              index < 8 ? "hex-pattern__row--left" : "hex-pattern__row--right"
+            )}
+            key={value}
+          >
+            <span>{value}</span>
+            <i>{index & 8 ? 1 : 0}</i>
+            <i>{index & 4 ? 1 : 0}</i>
+            <i>{index & 2 ? 1 : 0}</i>
+            <i>{index & 1 ? 1 : 0}</i>
+          </div>
+        ))}
+      </div>
+      <div className="hex-pattern__notes">
+        <span>
+          <b>8-kolom:</b> 8 nulle, dan 8 ene.
+        </span>
+        <span>
+          <b>4-kolom:</b> 4 nulle, dan 4 ene—herhaal.
+        </span>
+        <span>
+          <b>2-kolom:</b> 2 nulle, dan 2 ene—herhaal.
+        </span>
+        <span>
+          <b>1-kolom:</b> 1 nul, dan 1 een—herhaal.
+        </span>
+      </div>
+    </section>
+  );
+}
 
-function NegativeNumbers() { return <section className="topic-insert negative-numbers"><header><span>HEELGETALVOORSTELLING</span><h3>NEGATIEWE GETALLE VOORSTELLING</h3><p>Dieselfde 4 bisse kan verskillende waardes beteken. Lees altyd eers watter voorstelling die vraag voorskryf.</p></header><div className="negative-numbers__range"><div><span>4 bis / unsigned</span><b>0000 = 0</b><strong>1111 = 15</strong><p>Vier waarde-bisse gee 2⁴ = 16 patrone. Die waardes begin by 0, dus is die grootste 16−1 = 15.</p></div><i>⇢</i><div><span>Let op die linker tekenbis</span><b>0 = positief</b><strong>1 = negatief</strong><p>Die tekenbis is nie deel van die magnitude nie; die oorblywende bisse bepaal die getal se grootte.</p></div></div><div className="negative-numbers__methods"><article><h4>1. Teken en omvang</h4><div className="bit-row"><span>teken</span><b>omvang / magnitude</b></div><div className="bit-row"><i>0</i><b>111</b><em>+7</em></div><div className="bit-row"><i>1</i><b>111</b><em>−7</em></div><p>Een tekenbis laat drie omvangsbisse oor. Drie bisse kan 0–7 voorstel, daarom is die grootste positiewe waarde +7 en die kleinste negatiewe waarde −7. Daar is ’n +0 én ’n −0.</p></article><article><h4>2. Twee-komplement voorstelling</h4><div className="bit-row"><span>tekenwaarde</span><b>oorblywende bisse</b></div><div className="bit-row"><i>0</i><b>111</b><em>+7</em></div><div className="bit-row"><i>1</i><b>000</b><em>−8</em></div><p>Die hoogste positiewe patroon is 0111 = +7. Die laagste patroon is 1000 = −8. Daar is net een nul, dus word die ekstra patroon vir −8 gebruik.</p></article></div><div className="negative-numbers__rules"><div><b>UITBREIDING VAN BUSLENGTE</b><span>Unsigned: <code>1011 → 0000 1011</code>. Twee-komplement: herhaal tekenbis: <code>1011 → 1111 1011</code>.</span></div><div><b>OORLOOPREËL</b><span><strong>Twee insette met dieselfde teken wat ’n resultaat met die teenoorgestelde teken gee, beteken signed overflow.</strong> Voorbeeld: <code>0111 + 0001 = 1000</code>.</span></div></div></section>; }
+function NegativeNumbers() {
+  return (
+    <section className="topic-insert negative-numbers">
+      <header>
+        <span>HEELGETALVOORSTELLING</span>
+        <h3>NEGATIEWE GETALLE VOORSTELLING</h3>
+        <p>
+          Dieselfde 4 bisse kan verskillende waardes beteken. Lees altyd eers
+          watter voorstelling die vraag voorskryf.
+        </p>
+      </header>
+      <div className="negative-numbers__range">
+        <div>
+          <span>4 bis / unsigned</span>
+          <b>0000 = 0</b>
+          <strong>1111 = 15</strong>
+          <p>
+            Vier waarde-bisse gee 2⁴ = 16 patrone. Die waardes begin by 0, dus
+            is die grootste 16−1 = 15.
+          </p>
+        </div>
+        <i>⇢</i>
+        <div>
+          <span>Let op die linker tekenbis</span>
+          <b>0 = positief</b>
+          <strong>1 = negatief</strong>
+          <p>
+            Die tekenbis is nie deel van die magnitude nie; die oorblywende
+            bisse bepaal die getal se grootte.
+          </p>
+        </div>
+      </div>
+      <div className="negative-numbers__methods">
+        <article>
+          <h4>1. Teken en omvang</h4>
+          <div className="bit-row">
+            <span>teken</span>
+            <b>omvang / magnitude</b>
+          </div>
+          <div className="bit-row">
+            <i>0</i>
+            <b>111</b>
+            <em>+7</em>
+          </div>
+          <div className="bit-row">
+            <i>1</i>
+            <b>111</b>
+            <em>−7</em>
+          </div>
+          <p>
+            Een tekenbis laat drie omvangsbisse oor. Drie bisse kan 0–7
+            voorstel, daarom is die grootste positiewe waarde +7 en die kleinste
+            negatiewe waarde −7. Daar is ’n +0 én ’n −0.
+          </p>
+        </article>
+        <article>
+          <h4>2. Twee-komplement voorstelling</h4>
+          <div className="bit-row">
+            <span>tekenwaarde</span>
+            <b>oorblywende bisse</b>
+          </div>
+          <div className="bit-row">
+            <i>0</i>
+            <b>111</b>
+            <em>+7</em>
+          </div>
+          <div className="bit-row">
+            <i>1</i>
+            <b>000</b>
+            <em>−8</em>
+          </div>
+          <p>
+            Die hoogste positiewe patroon is 0111 = +7. Die laagste patroon is
+            1000 = −8. Daar is net een nul, dus word die ekstra patroon vir −8
+            gebruik.
+          </p>
+        </article>
+      </div>
+      <div className="negative-numbers__rules">
+        <div>
+          <b>UITBREIDING VAN BUSLENGTE</b>
+          <span>
+            Unsigned: <code>1011 → 0000 1011</code>. Twee-komplement: herhaal
+            tekenbis: <code>1011 → 1111 1011</code>.
+          </span>
+        </div>
+        <div>
+          <b>OORLOOPREËL</b>
+          <span>
+            <strong>
+              Twee insette met dieselfde teken wat ’n resultaat met die
+              teenoorgestelde teken gee, beteken signed overflow.
+            </strong>{" "}
+            Voorbeeld: <code>0111 + 0001 = 1000</code>.
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
 
-function IntegerCalculation() { return <section className="topic-insert integer-calculation"><header><span>HEELGETALBEREKENING</span><h3>Optel, maal, aftrek en wisselpunt.</h3><p>Werk altyd met die korrekte bislengte en benoem elke tussentydse waarde—die metode tel net soveel soos die antwoord.</p></header><div className="integer-calculation__blocks"><article><span>OPTEL V. 2-KOMPLEMENT VOORSTEL</span><h4>Begin by die regterste bis.</h4><pre>{"  0111  (+7)\n+ 0001  (+1)\n────────────\n  1000  (lyk negatief)"}</pre><p><strong>Dieselfde teken in; teenoorgestelde teken uit = oorloop.</strong> Die dra-bis alleen bewys nie signed overflow nie.</p></article><article><span>MAAL V. POSITIEWE GETALLE</span><h4>C–A–Q–M: toets Q₀, tel, skuif saam</h4><table><thead><tr><th>C</th><th>A</th><th>Q</th><th>M</th><th>aksie</th></tr></thead><tbody><tr><td>0</td><td>0000</td><td>0011</td><td>0101</td><td>Begin; Q₀=1</td></tr><tr><td>0</td><td>0101</td><td>0011</td><td>0101</td><td>A←A+M</td></tr><tr><td>0</td><td>0010</td><td>1001</td><td>0101</td><td>skuif C-A-Q regs</td></tr></tbody></table><p>Herhaal vir die vaste aantal bisse. Die finale A|Q is die produk.</p></article><article><span>DIE AFTREK REËL</span><h4>A − B met twee metodes</h4><WordSubtraction/><aside className="division-memory-in-subtraction"><b>Onthou die aftrekreël:</b> wanneer jy M aftrek, vorm M se <b>twee-komplement in dieselfde bislengte</b>—inverseer en tel <b>1</b> by. Die finale antwoord moet altyd die <b>heelgetal deel</b> én die <b>res</b> noem.</aside></article><div className="integer-division-examples-slot"/></div></section>; }
+function IntegerCalculation() {
+  return (
+    <section className="topic-insert integer-calculation">
+      <header>
+        <span>HEELGETALBEREKENING</span>
+        <h3>Optel, maal, aftrek en wisselpunt.</h3>
+        <p>
+          Werk altyd met die korrekte bislengte en benoem elke tussentydse
+          waarde—die metode tel net soveel soos die antwoord.
+        </p>
+      </header>
+      <div className="integer-calculation__blocks">
+        <article>
+          <span>OPTEL V. 2-KOMPLEMENT VOORSTEL</span>
+          <h4>Begin by die regterste bis.</h4>
+          <pre>
+            {"  0111  (+7)\n+ 0001  (+1)\n────────────\n  1000  (lyk negatief)"}
+          </pre>
+          <p>
+            <strong>
+              Dieselfde teken in; teenoorgestelde teken uit = oorloop.
+            </strong>{" "}
+            Die dra-bis alleen bewys nie signed overflow nie.
+          </p>
+        </article>
+        <article>
+          <span>MAAL V. POSITIEWE GETALLE</span>
+          <h4>C–A–Q–M: toets Q₀, tel, skuif saam</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>C</th>
+                <th>A</th>
+                <th>Q</th>
+                <th>M</th>
+                <th>aksie</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <td>0000</td>
+                <td>0011</td>
+                <td>0101</td>
+                <td>Begin; Q₀=1</td>
+              </tr>
+              <tr>
+                <td>0</td>
+                <td>0101</td>
+                <td>0011</td>
+                <td>0101</td>
+                <td>A←A+M</td>
+              </tr>
+              <tr>
+                <td>0</td>
+                <td>0010</td>
+                <td>1001</td>
+                <td>0101</td>
+                <td>skuif C-A-Q regs</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            Herhaal vir die vaste aantal bisse. Die finale A|Q is die produk.
+          </p>
+        </article>
+        <article>
+          <span>DIE AFTREK REËL</span>
+          <h4>A − B met twee metodes</h4>
+          <WordSubtraction />
+          <aside className="division-memory-in-subtraction">
+            <b>Onthou die aftrekreël:</b> wanneer jy M aftrek, vorm M se{" "}
+            <b>twee-komplement in dieselfde bislengte</b>—inverseer en tel{" "}
+            <b>1</b> by. Die finale antwoord moet altyd die{" "}
+            <b>heelgetal deel</b> én die <b>res</b> noem.
+          </aside>
+        </article>
+        <div className="integer-division-examples-slot" />
+      </div>
+    </section>
+  );
+}
 
-function LogicDeepDive() { return <section className="logic-deep-dive"><header><span>LE3 / HEKKE EN KOMBINEERDE STROOMBANE</span><h3>Waarheidstabelle wys die reël; sketse wys die pad.</h3><p>Wanneer jy ’n <b>NIE</b>-weergawe van ’n hek moet toon, voeg eenvoudig die NIE-kolom by die oorspronklike uitsetkolom.</p></header><div className="logic-tables"><article><h4>EN / AND</h4><table><tbody><tr><th>A</th><th>B</th><th>A EN B</th><th>NIE (A EN B)</th></tr><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td></tr></tbody></table></article><article><h4>OF / OR</h4><table><tbody><tr><th>A</th><th>B</th><th>A OF B</th><th>NIE (A OF B)</th></tr><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td></tr></tbody></table></article><article><h4>XOF / XOR</h4><table><tbody><tr><th>A</th><th>B</th><th>A XOF B</th><th>NIE (A XOF B)</th></tr><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody></table></article><article><h4>NIE / NOT</h4><table><tbody><tr><th>A</th><th>NIE A</th></tr><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr></tbody></table><p>Die driehoek met die klein sirkel in jou skets dui hierdie inversie aan.</p></article></div><div className="adder-deep"><article><span>HALWE OPTELLER</span><h4>Net A en B</h4><div className="adder-path"><b>A</b><b>B</b><i>→</i><div><strong>XOR</strong><span>Som</span></div><div><strong>AND</strong><span>Dra</span></div></div><table><tbody><tr><th>A</th><th>B</th><th>Som</th><th>Dra</th></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody></table><p>Voorbeeld: 1+1 = <b>10₂</b>; Som=0 en Dra=1.</p></article><article><span>VOLOPTELLER</span><h4>A, B én Cin</h4><div className="adder-path adder-path--full"><b>A</b><b>B</b><b>Cin</b><i>→</i><div><strong>HA₁</strong><span>S₁,C₁</span></div><div><strong>HA₂</strong><span>Som,C₂</span></div><div><strong>OR</strong><span>Cout</span></div></div><table><tbody><tr><th>A</th><th>B</th><th>Cin</th><th>Som</th><th>Cout</th></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr></tbody></table><p><b>Verskil:</b> die volopteller hanteer die ekstra dra-inset en kan dus in meerbis-optelling koppel.</p></article></div><div className="flipflop-deep"><article><span>HOUWIPKRING</span><h4>Stel/terugstel met terugvoer</h4><div className="latch-drawing"><b>S</b><i>→</i><div>NOR<br />NOR</div><i>→</i><strong>Q</strong><em>↺ terugvoer</em></div><table><tbody><tr><th>S</th><th>R</th><th>Q volgende</th></tr><tr><td>1</td><td>0</td><td>1 (stel)</td></tr><tr><td>0</td><td>1</td><td>0 (terugstel)</td></tr><tr><td>0</td><td>0</td><td>hou toestand</td></tr></tbody></table></article><article><span>WIPKRING</span><h4>Beheerde toestandverandering</h4><div className="latch-drawing"><b>D</b><i>→</i><div>Wipkring<br /><small>klok/sein</small></div><i>→</i><strong>Q</strong><em>toestand word beheer</em></div><table><tbody><tr><th>Beheer</th><th>Inset</th><th>Q volgende</th></tr><tr><td>aktief</td><td>1</td><td>1</td></tr><tr><td>aktief</td><td>0</td><td>0</td></tr><tr><td>nie aktief</td><td>enige</td><td>hou toestand</td></tr></tbody></table><p><b>Verskil:</b> albei het geheue; ’n houwipkring reageer volgens sy stel/terugstel-insette, terwyl ’n wipkring se verandering deur ’n beheer/kloksein bepaal word.</p></article></div></section>; }
+function LogicDeepDive() {
+  return (
+    <div className="le3-layout">
+      <section className="logic-deep-dive">
+        <header>
+          <span>LE3 / HEKKE EN KOMBINEERDE STROOMBANE</span>
+          <h3>Waarheidstabelle wys die reël; sketse wys die pad.</h3>
+          <p>
+            Wanneer jy ’n <b>NIE</b>-weergawe van ’n hek moet toon, voeg
+            eenvoudig die NIE-kolom by die oorspronklike uitsetkolom.
+          </p>
+        </header>
+        <div className="logic-tables">
+          <article>
+            <h4>EN / AND</h4>
+            <table>
+              <tbody>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>A EN B</th>
+                  <th>NIE (A EN B)</th>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+          <article>
+            <h4>OF / OR</h4>
+            <table>
+              <tbody>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>A OF B</th>
+                  <th>NIE (A OF B)</th>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+          <article>
+            <h4>XOF / XOR</h4>
+            <table>
+              <tbody>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>A XOF B</th>
+                  <th>NIE (A XOF B)</th>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+          <article>
+            <h4>NIE / NOT</h4>
+            <table>
+              <tbody>
+                <tr>
+                  <th>A</th>
+                  <th>NIE A</th>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              Die driehoek met die klein sirkel in jou skets dui hierdie
+              inversie aan.
+            </p>
+          </article>
+        </div>
+        <div className="adder-deep">
+          <article>
+            <span>HALWE OPTELLER</span>
+            <h4>Net A en B</h4>
+            <div className="adder-path">
+              <b>A</b>
+              <b>B</b>
+              <i>→</i>
+              <div>
+                <strong>XOR</strong>
+                <span>Som</span>
+              </div>
+              <div>
+                <strong>AND</strong>
+                <span>Dra</span>
+              </div>
+            </div>
+            <table>
+              <tbody>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>Som</th>
+                  <th>Dra</th>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              Voorbeeld: 1+1 = <b>10₂</b>; Som=0 en Dra=1.
+            </p>
+          </article>
+          <article>
+            <span>VOLOPTELLER</span>
+            <h4>A, B én Cin</h4>
+            <div className="adder-path adder-path--full">
+              <b>A</b>
+              <b>B</b>
+              <b>Cin</b>
+              <i>→</i>
+              <div>
+                <strong>HA₁</strong>
+                <span>S₁,C₁</span>
+              </div>
+              <div>
+                <strong>HA₂</strong>
+                <span>Som,C₂</span>
+              </div>
+              <div>
+                <strong>OR</strong>
+                <span>Cout</span>
+              </div>
+            </div>
+            <table>
+              <tbody>
+                <tr>
+                  <th>A</th>
+                  <th>B</th>
+                  <th>Cin</th>
+                  <th>Som</th>
+                  <th>Cout</th>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <b>Verskil:</b> die volopteller hanteer die ekstra dra-inset en
+              kan dus in meerbis-optelling koppel.
+            </p>
+            <section className="adder-extra-examples">
+              <span>TWEE EKSTRA VOORBEELDE</span>
+              <h5>Cin = 0; kyk hoe S tussen 0 en 1 verander.</h5>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Voorbeeld</th>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>Cin</th>
+                    <th>S</th>
+                    <th>Cout</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>1</th>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                  </tr>
+                  <tr>
+                    <th>2</th>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </article>
+        </div>
+      </section>
+      <section className="logic-deep-dive logic-deep-dive--sequential">
+        <header>
+          <span>WIPKRINGE &amp; SEKWNSIËLE STROOMBANE</span>
+          <h3>Toestand word met terugvoer behou en beheer.</h3>
+          <p>
+            Hierdie blok groepeer die houwipkring en wipkring as
+            geheue-elemente, apart van die kombinasionele hekke en optellers.
+          </p>
+        </header>
+        <div className="flipflop-deep">
+          <article>
+            <span>HOUWIPKRING</span>
+            <h4>Stel/terugstel met terugvoer</h4>
+            <div className="latch-drawing">
+              <b>S</b>
+              <i>→</i>
+              <div>
+                NOR
+                <br />
+                NOR
+              </div>
+              <i>→</i>
+              <strong>Q</strong>
+              <em>↺ terugvoer</em>
+            </div>
+            <table>
+              <tbody>
+                <tr>
+                  <th>S</th>
+                  <th>R</th>
+                  <th>Q volgende</th>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1 (stel)</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>0 (terugstel)</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0</td>
+                  <td>hou toestand</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+          <article>
+            <span>WIPKRING</span>
+            <h4>Beheerde toestandverandering</h4>
+            <div className="latch-drawing">
+              <b>D</b>
+              <i>→</i>
+              <div>
+                Wipkring
+                <br />
+                <small>klok/sein</small>
+              </div>
+              <i>→</i>
+              <strong>Q</strong>
+              <em>toestand word beheer</em>
+            </div>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Beheer</th>
+                  <th>Inset</th>
+                  <th>Q volgende</th>
+                </tr>
+                <tr>
+                  <td>aktief</td>
+                  <td>1</td>
+                  <td>1</td>
+                </tr>
+                <tr>
+                  <td>aktief</td>
+                  <td>0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>nie aktief</td>
+                  <td>enige</td>
+                  <td>hou toestand</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <b>Verskil:</b> albei het geheue; ’n houwipkring reageer volgens
+              sy stel/terugstel-insette, terwyl ’n wipkring se verandering deur
+              ’n beheer/kloksein bepaal word.
+            </p>
+          </article>
+        </div>
+      </section>
+    </div>
+  );
+}
 
-const iasDetails: Record<string, string> = { "HOOFGEHEUE": "Hou beide data en instruksiewoorde. ’n IAS-geheuewoord is 40 bisse lank.", "AC": "Accumulator / Opteller. Hou tussentydse rekenkundige resultate.", "MQ": "Multiply-quotient register. Word by vermenigvuldiging en deling gebruik.", "MBR": "Memory buffer register. Dra die hele woord wat na of vanaf geheue beweeg.", "PC": "Program counter. Hou die adres van die volgende instruksiewoord.", "IBR": "Instruction buffer register. Hou die ander, gewoonlik regter, 20-bis instruksie.", "MAR": "Memory address register. Dra die geheue-adres wat gekies moet word.", "IR": "Instruction register. Hou die instruksie wat tans uitgevoer word.", "T/A": "Toevoer/afvoer beweeg data tussen die rekenaar en die buitewêreld; beheerseine lei die oordrag." };
+const iasDetails: Record<string, string> = {
+  HOOFGEHEUE:
+    "Hou beide data en instruksiewoorde. ’n IAS-geheuewoord is 40 bisse lank.",
+  AC: "Accumulator / Opteller. Hou tussentydse rekenkundige resultate.",
+  MQ: "Multiply-quotient register. Word by vermenigvuldiging en deling gebruik.",
+  MBR: "Memory buffer register. Dra die hele woord wat na of vanaf geheue beweeg.",
+  PC: "Program counter. Hou die adres van die volgende instruksiewoord.",
+  IBR: "Instruction buffer register. Hou die ander, gewoonlik regter, 20-bis instruksie.",
+  MAR: "Memory address register. Dra die geheue-adres wat gekies moet word.",
+  IR: "Instruction register. Hou die instruksie wat tans uitgevoer word.",
+  "T/A":
+    "Toevoer/afvoer beweeg data tussen die rekenaar en die buitewêreld; beheerseine lei die oordrag.",
+};
 
-function IasLab() { const [active, setActive] = useState("MBR"); const [show, setShow] = useState(false); const [example, setExample] = useState(0); const examples = [{ word: "M(0): LOAD M(1000) | ADD M(1001)", values: "M(1000)=3; M(1001)=2", result: "AC=5" }, { word: "M(0): LOAD M(1010) | SUB M(1011)", values: "M(1010)=12; M(1011)=5", result: "AC=7" }, { word: "M(0): LOAD M(1020) | ADD M(1021)", values: "M(1020)=7; M(1021)=6", result: "AC=13" }]; const current = examples[example]; const node = (name: string, className = "") => <button key={name} type="button" onClick={() => setActive(name)} className={cx("ias-node", active === name && "ias-node--active", className)}>{name}</button>; return <section className="ias-lab-deep"><header><span>LE5 / IAS STRUKTUUR</span><h3>IAS Struktuur: volg die skets, registerpad en oefenvoorbeelde saam.</h3><p>Klik ’n benoemde blokkie. Die notapaneel wys dan die register se doel en wat jy in ’n TKA-antwoord moet noem.</p></header><div className="ias-structure-slot"/><div className="ias-lab-deep__layout"><div className="ias-diagram-deep"><div className="ias-memory-deep">{node("HOOFGEHEUE")}<div>{["M(0)", "M(1)", "M(2)", "M(3)", "⋮", "M(4094)", "M(4095)"].map((row) => <span key={row}>{row}</span>)}</div></div><div className="ias-bus ias-bus--data-left">instruksies en data <i>→</i></div><div className="ias-cpu-deep"><b>SENTRALE VERWERKINGSEENHEID (CPU)</b><section><h4>REKENKUNDIGE-LOGIESE EENHEID (CA)</h4><div className="ias-cpu-deep__row">{node("AC")}{node("MQ")}<i>↔</i></div><div className="ias-arrow-down">↓&nbsp;&nbsp;&nbsp;&nbsp;↓</div><div className="ias-logic-deep">Rekenkundige-logiese<br />stroombane</div><div className="ias-arrow-down">↕</div>{node("MBR")}</section><section><h4>PROGRAMBEHEER-EENHEID (CC)</h4><div className="ias-cpu-deep__grid">{node("PC")}{node("IBR")}{node("MAR")}{node("IR")}</div><div className="ias-control-deep">Beheerstroombane <i>↔</i> beheerstroombane</div></section></div><div className="ias-bus ias-bus--data-right"><i>→</i> instruksies en data</div><div className="ias-io-deep">{node("T/A")}</div><div className="ias-bus ias-bus--address"><i>←</i> adresse vanaf MAR</div></div><aside className="ias-detail-deep"><span>GEKOSE KOMPONENT</span><h4>{active}</h4><p>{iasDetails[active]}</p><div><b>Onthou:</b> volg die pylrigting; noem die bron, die pyl en die bestemming.</div></aside></div><div className="ias-process-repaired"><div><span>IAS-PROSES</span><h4>Gaan haal en voer uit.</h4></div><Button variant="outline" className="workbook-button" onClick={() => setShow(!show)}><Play className="size-4" />{show ? "Versteek proses" : "Loop deur die proses"}</Button>{show ? <ol><li><b>1</b><div><strong>Toets die IBR.</strong><p>Is die volgende instruksie reeds in die instruksiebuffer?</p><code>IBR bevat volgende instruksie?</code></div></li><li><b>2</b><div><strong>Haal ’n geheuewoord wanneer IBR leeg is.</strong><p>Die programteller lewer die adres; die geheuewoord word na die buffer gelees.</p><code>MAR ← PC&nbsp; → &nbsp;MBR ← M(MAR)</code></div></li><li><b>3</b><div><strong>Stuur links na IR/MAR en hou regs in IBR.</strong><p>Die regter 20-bis instruksie wag; die linker instruksie word eerste voorberei.</p><code>IBR ← MBR(20:39) &nbsp;→&nbsp; IR ← MBR(0:7) &nbsp;→&nbsp; MAR ← MBR(8:19)</code></div></li><li><b>4</b><div><strong>Verhoog PC en voer die linker instruksie uit.</strong><p>PC wys al na die volgende woord terwyl die linker datapad werk.</p><code>PC ← PC + 1 &nbsp;→&nbsp; voer linker instruksie uit</code></div></li><li><b>5</b><div><strong>Gebruik daarna die wagende regter instruksie.</strong><p>IBR se opcode en adres gaan na IR en MAR; voer dan die regter kant uit.</p><code>IR ← IBR(0:7) &nbsp;→&nbsp; MAR ← IBR(8:19) &nbsp;→&nbsp; voer regs uit</code></div></li></ol> : null}</div><section className="ias-tka-examples"><header><div><span>IAS / TKA-OEFENVOORBEELDE</span><h4>Werk deur ’n linker en regter instruksie.</h4></div><div>{examples.map((item, index) => <button type="button" key={item.word} onClick={() => setExample(index)} className={cx(example === index && "ias-tka-examples__active")}>Voorbeeld {index + 1}</button>)}</div></header><div className="ias-tka-examples__scenario"><span>{current.word}</span><b>{current.values}</b></div><table><thead><tr><th>Stap</th><th>Register-/geheuebeweging</th><th>Waarom?</th></tr></thead><tbody><tr><td>1</td><td>MAR ← PC; MBR ← M(MAR)</td><td>Haal die hele 40-bis woord.</td></tr><tr><td>2</td><td>IBR ← regter helfte; IR/MAR ← linker helfte</td><td>Bewaar regs, berei links voor.</td></tr><tr><td>3</td><td>Voer linker instruksie uit</td><td>AC ontvang die eerste operand/resultaat.</td></tr><tr><td>4</td><td>IR/MAR ← IBR; voer regs uit</td><td>Gebruik die wagende instruksie; finale {current.result}.</td></tr></tbody></table></section><div className="le5-extra-cards"><article><span>HEKKE EN GEHEUESELLE</span><h4>Geheue stoor ’n bis as ’n stabiele toestand.</h4><p>’n Geheuesel gebruik elektroniese stroombane met twee stabiele toestande om 0 of 1 te behou. Hekke en wipkringe vorm die logiese boublokke waaruit registers en geheue georganiseer word.</p><div className="memory-cell-sketch"><b>inset</b><i>→</i><span>sel 0/1</span><i>→</i><b>uitset</b></div></article><article><span>BEWEGING NA MIKROELEKTRONIESE SKYFIES</span><h4>Meer funksie, kleiner fisiese ruimte.</h4><p>Mikroelektroniese skyfies integreer baie transistors en stroombane op klein materiaal. Dit maak korter verbindings, vinniger oordragte, laer energieverbruik en meer funksie per skyfie moontlik.</p><div className="chip-evolution"><b>los komponente</b><i>→</i><b>IC</b><i>→</i><b>VLSI-skyfie</b><i>→</i><b>stelsel-op-skyfie</b></div></article></div></section>; }
+function IasLab() {
+  const [active, setActive] = useState("MBR");
+  const [show, setShow] = useState(false);
+  const [example, setExample] = useState(0);
+  const examples = [
+    {
+      word: "M(0): LOAD M(1000) | ADD M(1001)",
+      values: "M(1000)=3; M(1001)=2",
+      result: "AC=5",
+    },
+    {
+      word: "M(0): LOAD M(1010) | SUB M(1011)",
+      values: "M(1010)=12; M(1011)=5",
+      result: "AC=7",
+    },
+    {
+      word: "M(0): LOAD M(1020) | ADD M(1021)",
+      values: "M(1020)=7; M(1021)=6",
+      result: "AC=13",
+    },
+  ];
+  const current = examples[example];
+  const node = (name: string, className = "") => (
+    <button
+      key={name}
+      type="button"
+      onClick={() => setActive(name)}
+      className={cx(
+        "ias-node",
+        active === name && "ias-node--active",
+        className
+      )}
+    >
+      {name}
+    </button>
+  );
+  return (
+    <section className="ias-lab-deep">
+      <header>
+        <span>LE5 / IAS STRUKTUUR</span>
+        <h3>
+          IAS Struktuur: volg die skets, registerpad en oefenvoorbeelde saam.
+        </h3>
+        <p>
+          Klik ’n benoemde blokkie. Die notapaneel wys dan die register se doel
+          en wat jy in ’n TKA-antwoord moet noem.
+        </p>
+      </header>
+      <div className="ias-structure-slot" />
+      <div className="ias-lab-deep__layout">
+        <div className="ias-diagram-deep">
+          <div className="ias-memory-deep">
+            {node("HOOFGEHEUE")}
+            <div>
+              {["M(0)", "M(1)", "M(2)", "M(3)", "⋮", "M(4094)", "M(4095)"].map(
+                row => (
+                  <span key={row}>{row}</span>
+                )
+              )}
+            </div>
+          </div>
+          <div className="ias-bus ias-bus--data-left">
+            instruksies en data <i>→</i>
+          </div>
+          <div className="ias-cpu-deep">
+            <b>SENTRALE VERWERKINGSEENHEID (CPU)</b>
+            <section>
+              <h4>REKENKUNDIGE-LOGIESE EENHEID (CA)</h4>
+              <div className="ias-cpu-deep__row">
+                {node("AC")}
+                {node("MQ")}
+                <i>↔</i>
+              </div>
+              <div className="ias-arrow-down">↓&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+              <div className="ias-logic-deep">
+                Rekenkundige-logiese
+                <br />
+                stroombane
+              </div>
+              <div className="ias-arrow-down">↕</div>
+              {node("MBR")}
+            </section>
+            <section>
+              <h4>PROGRAMBEHEER-EENHEID (CC)</h4>
+              <div className="ias-cpu-deep__grid">
+                {node("PC")}
+                {node("IBR")}
+                {node("MAR")}
+                {node("IR")}
+              </div>
+              <div className="ias-control-deep">
+                Beheerstroombane <i>↔</i> beheerstroombane
+              </div>
+            </section>
+          </div>
+          <div className="ias-bus ias-bus--data-right">
+            <i>→</i> instruksies en data
+          </div>
+          <div className="ias-io-deep">{node("T/A")}</div>
+          <div className="ias-bus ias-bus--address">
+            <i>←</i> adresse vanaf MAR
+          </div>
+        </div>
+        <aside className="ias-detail-deep">
+          <span>GEKOSE KOMPONENT</span>
+          <h4>{active}</h4>
+          <p>{iasDetails[active]}</p>
+          <div>
+            <b>Onthou:</b> volg die pylrigting; noem die bron, die pyl en die
+            bestemming.
+          </div>
+        </aside>
+      </div>
+      <div className="ias-process-repaired">
+        <div>
+          <span>IAS-PROSES</span>
+          <h4>Gaan haal en voer uit.</h4>
+        </div>
+        <Button
+          variant="outline"
+          className="workbook-button"
+          onClick={() => setShow(!show)}
+        >
+          <Play className="size-4" />
+          {show ? "Versteek proses" : "Loop deur die proses"}
+        </Button>
+        {show ? (
+          <ol>
+            <li>
+              <b>1</b>
+              <div>
+                <strong>Toets die IBR.</strong>
+                <p>Is die volgende instruksie reeds in die instruksiebuffer?</p>
+                <code>IBR bevat volgende instruksie?</code>
+              </div>
+            </li>
+            <li>
+              <b>2</b>
+              <div>
+                <strong>Haal ’n geheuewoord wanneer IBR leeg is.</strong>
+                <p>
+                  Die programteller lewer die adres; die geheuewoord word na die
+                  buffer gelees.
+                </p>
+                <code>MAR ← PC&nbsp; → &nbsp;MBR ← M(MAR)</code>
+              </div>
+            </li>
+            <li>
+              <b>3</b>
+              <div>
+                <strong>Stuur links na IR/MAR en hou regs in IBR.</strong>
+                <p>
+                  Die regter 20-bis instruksie wag; die linker instruksie word
+                  eerste voorberei.
+                </p>
+                <code>
+                  IBR ← MBR(20:39) &nbsp;→&nbsp; IR ← MBR(0:7) &nbsp;→&nbsp; MAR
+                  ← MBR(8:19)
+                </code>
+              </div>
+            </li>
+            <li>
+              <b>4</b>
+              <div>
+                <strong>Verhoog PC en voer die linker instruksie uit.</strong>
+                <p>
+                  PC wys al na die volgende woord terwyl die linker datapad
+                  werk.
+                </p>
+                <code>
+                  PC ← PC + 1 &nbsp;→&nbsp; voer linker instruksie uit
+                </code>
+              </div>
+            </li>
+            <li>
+              <b>5</b>
+              <div>
+                <strong>Gebruik daarna die wagende regter instruksie.</strong>
+                <p>
+                  IBR se opcode en adres gaan na IR en MAR; voer dan die regter
+                  kant uit.
+                </p>
+                <code>
+                  IR ← IBR(0:7) &nbsp;→&nbsp; MAR ← IBR(8:19) &nbsp;→&nbsp; voer
+                  regs uit
+                </code>
+              </div>
+            </li>
+          </ol>
+        ) : null}
+      </div>
+      <section className="ias-tka-examples">
+        <header>
+          <div>
+            <span>IAS / TKA-OEFENVOORBEELDE</span>
+            <h4>Werk deur ’n linker en regter instruksie.</h4>
+          </div>
+          <div>
+            {examples.map((item, index) => (
+              <button
+                type="button"
+                key={item.word}
+                onClick={() => setExample(index)}
+                className={cx(example === index && "ias-tka-examples__active")}
+              >
+                Voorbeeld {index + 1}
+              </button>
+            ))}
+          </div>
+        </header>
+        <div className="ias-tka-examples__scenario">
+          <span>{current.word}</span>
+          <b>{current.values}</b>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Stap</th>
+              <th>Register-/geheuebeweging</th>
+              <th>Waarom?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>MAR ← PC; MBR ← M(MAR)</td>
+              <td>Haal die hele 40-bis woord.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>IBR ← regter helfte; IR/MAR ← linker helfte</td>
+              <td>Bewaar regs, berei links voor.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Voer linker instruksie uit</td>
+              <td>AC ontvang die eerste operand/resultaat.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>IR/MAR ← IBR; voer regs uit</td>
+              <td>Gebruik die wagende instruksie; finale {current.result}.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+  );
+}
 
-function Le5Extras() { return <><section className="four-functions"><header><span>LE5 / VIER BASIESE FUNKSIES</span><h3>STRUKTUUR & FUNKSIE</h3><p>Die vier basiese funksies verbind elke taak met die rekenaarkomponent wat dit hoofsaaklik uitvoer.</p></header><div className="overflow-x-auto"><table><thead><tr><th>Funksie</th><th>Verduideliking</th><th>Hoofkomponent(e)</th><th>Voorbeeld</th></tr></thead><tbody><tr><td>Dataverwerking</td><td>Verander data volgens instruksies: tel, vergelyk, logiese bewerking.</td><td><b>CPU</b>, spesifiek ALU/CA</td><td>AC kry die som van twee waardes.</td></tr><tr><td>Datastoor</td><td>Hou programme, data en tussentydse resultate.</td><td>Hoofgeheue, registers, kas</td><td>MBR hou ’n geheuewoord tydelik.</td></tr><tr><td>Databeweging</td><td>Verskuif data tussen geheue, CPU en toevoer/afvoer.</td><td>Busse, MAR, MBR, T/A</td><td>MBR ← M(MAR).</td></tr><tr><td>Beheer</td><td>Koördineer die volgorde van instruksies en seine.</td><td>CC, PC, IR, beheerstroombane</td><td>PC kies die volgende instruksiewoord.</td></tr></tbody></table></div></section><section className="cache-core"><article><span>KASGEHEUE</span><h3>’n Klein, vinnige buffer naby die CPU.</h3><p>Kasgeheue hou instruksies en data wat waarskynlik weer nodig is. ’n Kas-treffer vermy ’n stadiger hoofgeheue-toegang; ’n kas-mis vereis dat die blok uit hoofgeheue gebring word.</p><div><b>CPU</b><i>↔</i><strong>KAS</strong><i>↔</i><b>HOOFGEHEUE</b></div></article><article><span>HOOFELEMENTE v. MEERKERNREKENAAR</span><h3>Een algemene struktuur; meer as een verwerkingskern.</h3><div className="core-comparison"><div><b>Enkelkern</b><span>CPU</span><i>↔</i><span>Kas</span><i>↔</i><span>Geheue</span></div><div><b>Meerkern</b><span>Kern 1</span><span>Kern 2</span><span>Kern 3</span><i>↔</i><strong>Gedeelde kas/geheue</strong></div></div><p>’n Meerkernstelsel kan verskillende take of dele van ’n program gelyk uitvoer, mits die program daardie parallelisme kan gebruik.</p></article></section></>; }
+function Le5Organisation() {
+  return (
+    <section className="le5-major-block le5-major-block--organisation">
+      <header>
+        <span>LE5 / ORGANISASIE &amp; ARGITEKTUUR</span>
+        <h3>ORGANISASIE &amp; ARGITEKTUUR</h3>
+        <p>
+          Skei wat die programmeerder sien van hoe die rekenaar dit intern
+          implementeer.
+        </p>
+      </header>
+      <section className="cache-core">
+        <article>
+          <span>KASGEHEUE</span>
+          <h3>’n Klein, vinnige buffer naby die CPU.</h3>
+          <p>
+            Kasgeheue hou instruksies en data wat waarskynlik weer nodig is. ’n
+            Kas-treffer vermy ’n stadiger hoofgeheue-toegang; ’n kas-mis vereis
+            dat die blok uit hoofgeheue gebring word.
+          </p>
+          <div>
+            <b>CPU</b>
+            <i>↔</i>
+            <strong>KAS</strong>
+            <i>↔</i>
+            <b>HOOFGEHEUE</b>
+          </div>
+        </article>
+        <article>
+          <span>HOOFELEMENTE v. MEERKERNREKENAAR</span>
+          <h3>Een algemene struktuur; meer as een verwerkingskern.</h3>
+          <div className="core-comparison">
+            <div>
+              <b>Enkelkern</b>
+              <span>CPU</span>
+              <i>↔</i>
+              <span>Kas</span>
+              <i>↔</i>
+              <span>Geheue</span>
+            </div>
+            <div>
+              <b>Meerkern</b>
+              <span>Kern 1</span>
+              <span>Kern 2</span>
+              <span>Kern 3</span>
+              <i>↔</i>
+              <strong>Gedeelde kas/geheue</strong>
+            </div>
+          </div>
+          <p>
+            ’n Meerkernstelsel kan verskillende take of dele van ’n program
+            gelyk uitvoer, mits die program daardie parallelisme kan gebruik.
+          </p>
+        </article>
+      </section>
+    </section>
+  );
+}
 
-function Le6Extras() { return <section className="le6-deep"><header><span>LE6 / PRESTASIE-KWESSIES</span><h3>Ontwerp vir prestasie; meerkern en grafiese verwerkers.</h3><p>Gebruik die kleurkode om verwerker-spoedtegnieke van skyfie-/kernparallelisme te onderskei.</p></header><section><h4>ONTWERP VIR PRESTASIE</h4><div className="le6-topic-grid"><article className="le6-topic--blue"><span>VERWERKER SPOED</span><h5>Pyplyn, vertakking en datavloei</h5><pre>{"mov eax, [a]    ; I1\nadd ebx, eax    ; I2 gebruik eax\nmov ecx, [b]    ; I3"}</pre><p>I2 is data-afhanklik van I1. Die pyplyn kan I3 intussen gaan haal, maar I2 moet wag tot die waarde beskikbaar is.</p><div className="le6-verwerker-slot"><Le6MovedConcepts/></div></article><article className="le6-topic--orange"><span>PRESTASIE BALANS</span><h5>Vinniger is net nuttig wanneer die bottelnek verskuif.</h5><p>’n Baie vinnige CPU help nie volledig as geheuetoegang, I/O, afhanklikhede of verkeerde vertakkings die instruksiestroom terughou nie. Balans kyk na die stelsel as geheel.</p><div className="balance-sketch"><b>CPU</b><i>↔</i><b>Kas</b><i>↔</i><b>Geheue</b><i>↔</i><b>I/O</b></div></article><article className="le6-topic--green"><span>VERBETERING IN SKYFIE ORGANISASIE EN ARGITEKTUUR</span><h5>Meer werks-eenhede, slimmer beplanning.</h5><p><b>Superskalêr:</b> stuur onafhanklike instruksies na LSE, RLE en VVE. <b>Spekulatief:</b> begin werk op die voorspelde pad. <b>Datavloei:</b> soek wat nie op ’n vorige resultaat wag nie.</p><div className="unit-code"><span>LSE</span><span>RLE</span><span>VVE</span></div></article></div><section className="pipeline-tka"><header><span>VERWERKER SPOED / TKA-VOORBEELD</span><h5>Pyplyn: GH, DE en UV oorvleuel in tyd.</h5></header><table><thead><tr><th>Siklus</th><th>GH</th><th>DE</th><th>UV</th></tr></thead><tbody><tr><td>1</td><td>I1: mov eax,[a]</td><td></td><td></td></tr><tr><td>2</td><td>I2: add ebx,eax</td><td>I1</td><td></td></tr><tr><td>3</td><td>I3: mov ecx,[b]</td><td>I2 (wag indien eax nie gereed)</td><td>I1</td></tr><tr><td>4</td><td></td><td>I3</td><td>I2 wanneer data gereed is</td></tr></tbody></table><p><b>Vergelyking:</b> sonder pyplyn voltooi I1 al sy stappe voor I2 begin; met pyplyn oorvleuel onafhanklike werk, maar data-afhanklikheid kan ’n vertraging skep.</p></section></section><section><h4>MEERKERN EN GRAFIESE VERWERKERS</h4><article className="integrated-core"><span>MEER GEÏNTEGREERDE KERN EN GRAFIESE VERWERKER</span><h5>CPU-kerne verwerk algemene take; GPU-kerns herhaal baie soortgelyke werk parallel.</h5><div><section><b>CPU</b><i>Kern 1</i><i>Kern 2</i><i>Kern 3</i><i>Kern 4</i><small>Buigsame, algemene programvloei.</small></section><strong>↔</strong><section><b>GPU</b><div className="gpu-cells">{Array.from({ length: 20 }, (_, index) => <i key={index}>{index + 1}</i>)}</div><small>Baie eenvoudige, soortgelyke berekeninge oor groot data.</small></section></div><p><b>Vergelyking:</b> meerkern verbeter parallelle algemene verwerking; ’n GPU blink uit wanneer baie data-elemente dieselfde tipe berekening benodig.</p></article></section></section>; }
+function Le5Extras() {
+  return (
+    <section className="le5-major-block le5-major-block--structure">
+      <header>
+        <span>LE5 / STRUKTUUR &amp; FUNKSIE</span>
+        <h3>STRUKTUUR &amp; FUNKSIE</h3>
+        <p>
+          Die vier basiese funksies verbind elke taak met die rekenaarkomponent
+          wat dit hoofsaaklik uitvoer.
+        </p>
+      </header>
+      <section className="four-functions">
+        <header>
+          <span>LE5 / VIER BASIESE FUNKSIES</span>
+          <h3>Vier basiese funksies</h3>
+          <p>Verwerking, stoor, beweging en beheer.</p>
+        </header>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Funksie</th>
+                <th>Verduideliking</th>
+                <th>Hoofkomponent(e)</th>
+                <th>Voorbeeld</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Dataverwerking</td>
+                <td>
+                  Verander data volgens instruksies: tel, vergelyk, logiese
+                  bewerking.
+                </td>
+                <td>
+                  <b>CPU</b>, spesifiek ALU/CA
+                </td>
+                <td>AC kry die som van twee waardes.</td>
+              </tr>
+              <tr>
+                <td>Datastoor</td>
+                <td>Hou programme, data en tussentydse resultate.</td>
+                <td>Hoofgeheue, registers, kas</td>
+                <td>MBR hou ’n geheuewoord tydelik.</td>
+              </tr>
+              <tr>
+                <td>Databeweging</td>
+                <td>Verskuif data tussen geheue, CPU en toevoer/afvoer.</td>
+                <td>Busse, MAR, MBR, T/A</td>
+                <td>MBR ← M(MAR).</td>
+              </tr>
+              <tr>
+                <td>Beheer</td>
+                <td>Koördineer die volgorde van instruksies en seine.</td>
+                <td>CC, PC, IR, beheerstroombane</td>
+                <td>PC kies die volgende instruksiewoord.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  );
+}
 
-function Le6MovedConcepts(){const [open,setOpen]=useState<"dependency"|"branches"|"">("");return <section className="le6-moved-concepts"><article><span>DATA-GEVAAR</span><h5>Data-afhanklikheid: die verbruiker wag vir die verskaffer.</h5><p>’n Instruksie wat ’n register lees wat ’n vroeëre instruksie eers gaan skryf, moet wag totdat die waarde in UV beskikbaar is.</p><code>mov eax,[a] <b>skryf eax</b> → add ebx,eax <b>lees eax</b></code><button type="button" onClick={()=>setOpen(open==="dependency"?"":"dependency")}><Play className="size-3.5"/>{open==="dependency"?"Versteek voorbeelde":"Wys 2 voorbeelde"}</button>{open==="dependency"?<ol><li><b>Voorbeeld A:</b> <code>mov eax,[a]</code> moet eers voltooi voordat <code>add ebx,eax</code> die waarde lees.</li><li><b>Voorbeeld B:</b> <code>mov edx,[b]</code> moet klaar wees voordat <code>imul esi,edx</code> uitvoer.</li></ol>:null}</article><article><span>VOORSPEL</span><h5>Vertakkingvoorspelling: tel foute en vermenigvuldig die straf.</h5><p>Gebruik die vorige werklike uitkoms as die volgende voorspelling. ’n Fout kos die gegewe aantal siklusse.</p><table><thead><tr><th>Werklik</th><th>N</th><th>V</th><th>V</th><th>N</th></tr></thead><tbody><tr><th>Voorspel</th><td>N</td><td>N</td><td>V</td><td>V</td></tr><tr><th>Reg/Fout</th><td>–</td><td>F</td><td>R</td><td>F</td></tr></tbody></table><button type="button" onClick={()=>setOpen(open==="branches"?"":"branches")}><Play className="size-3.5"/>{open==="branches"?"Versteek voorbeelde":"Wys 2 voorbeelde"}</button>{open==="branches"?<p className="le6-moved-concepts__answer"><b>Voorbeeld:</b> 4 foute × 3 siklusse = <strong>12 siklusse straf</strong>. Die eerste ry tel nie as ’n fout wanneer die vraag dit as korrek gee nie.</p>:null}</article></section>}
+function Le5MemoryModules() {
+  return (
+    <section className="le5-major-block le5-major-block--memory">
+      <header>
+        <span>LE5 / HEKKE, GEHEUE, SKYFIES &amp; MODULES</span>
+        <h3>HEKKE, GEHEUE, SKYFIES &amp; MODULES</h3>
+        <p>
+          Hekke bou logika; geheueselle hou toestand; skyfies en modules
+          kombineer kapasiteit en funksie.
+        </p>
+      </header>
+      <div className="le5-extra-cards">
+        <article>
+          <span>HEKKE EN GEHEUESELLE</span>
+          <h4>Geheue stoor ’n bis as ’n stabiele toestand.</h4>
+          <p>
+            ’n Geheuesel gebruik elektroniese stroombane met twee stabiele
+            toestande om 0 of 1 te behou. Hekke en wipkringe vorm die logiese
+            boublokke waaruit registers en geheue georganiseer word.
+          </p>
+          <div className="memory-cell-sketch">
+            <b>inset</b>
+            <i>→</i>
+            <span>sel 0/1</span>
+            <i>→</i>
+            <b>uitset</b>
+          </div>
+        </article>
+        <article>
+          <span>SKYFIES &amp; MODULES</span>
+          <h4>Meer funksie, kleiner fisiese ruimte.</h4>
+          <p>
+            Mikro-elektroniese skyfies integreer baie transistors en stroombane
+            op klein materiaal. Modules kombineer skyfies om meer adresse, ’n
+            wyer woord of albei te bied.
+          </p>
+          <div className="chip-evolution">
+            <b>los komponente</b>
+            <i>→</i>
+            <b>IC</b>
+            <i>→</i>
+            <b>VLSI-skyfie</b>
+            <i>→</i>
+            <b>module</b>
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
 
-function TopicDrills({ unitId }: { unitId: string }) { const items = topicDrills[unitId] ?? []; const [answers, setAnswers] = useState<Record<number, string>>({}); const [marked, setMarked] = useState(false); const score = items.filter((item, index) => normalise(answers[index] ?? "") === normalise(item.answer)).length; return <section className="topic-drills"><header><div><span>MEER INVULOEFENINGE</span><h3>Een kort vraag vir elke kernonderwerp.</h3><p>Merk jou antwoorde. ’n Verkeerde antwoord wys die korrekte antwoord én ’n kort hersieningsnota.</p></div><Button className="mark-button" onClick={() => setMarked(true)}><Check className="size-4" /> Merk</Button></header><div>{items.map((item, index) => { const isCorrect = normalise(answers[index] ?? "") === normalise(item.answer); return <label className={cx(marked && !isCorrect && "topic-drills__wrong")} key={item.prompt}><span>{String(index + 1).padStart(2, "0")}</span><b>{item.prompt}</b><input value={answers[index] ?? ""} onChange={(event) => { setAnswers((values) => ({ ...values, [index]: event.target.value })); setMarked(false); }} placeholder="Jou antwoord" />{marked ? <em className={isCorrect ? "topic-drills__correct" : ""}>{isCorrect ? "Korrek" : `${item.answer} — ${item.note}`}</em> : null}</label>; })}</div><footer><button type="button" onClick={() => { setAnswers({}); setMarked(false); }}><RotateCcw className="size-4" /> Herstel</button>{marked ? <strong>{score}/{items.length} korrek</strong> : null}</footer></section>; }
+function Le6Extras() {
+  return (
+    <section className="le6-deep">
+      <header>
+        <span>LE6 / PRESTASIE-KWESSIES</span>
+        <h3>Ontwerp vir prestasie; meerkern en grafiese verwerkers.</h3>
+        <p>
+          Gebruik die kleurkode om verwerker-spoedtegnieke van
+          skyfie-/kernparallelisme te onderskei.
+        </p>
+      </header>
+      <section>
+        <h4>ONTWERP VIR PRESTASIE</h4>
+        <div className="le6-topic-grid">
+          <article className="le6-topic--blue">
+            <span>VERWERKER SPOED</span>
+            <h5>Pyplyn, vertakking en datavloei</h5>
+            <pre>
+              {
+                "mov eax, [a]    ; I1\nadd ebx, eax    ; I2 gebruik eax\nmov ecx, [b]    ; I3"
+              }
+            </pre>
+            <p>
+              I2 is data-afhanklik van I1. Die pyplyn kan I3 intussen gaan haal,
+              maar I2 moet wag tot die waarde beskikbaar is.
+            </p>
+            <div className="le6-verwerker-slot">
+              <Le6MovedConcepts />
+            </div>
+          </article>
+          <article className="le6-topic--orange">
+            <span>PRESTASIE BALANS</span>
+            <h5>Vinniger is net nuttig wanneer die bottelnek verskuif.</h5>
+            <p>
+              ’n Baie vinnige CPU help nie volledig as geheuetoegang, I/O,
+              afhanklikhede of verkeerde vertakkings die instruksiestroom
+              terughou nie. Balans kyk na die stelsel as geheel.
+            </p>
+            <div className="balance-sketch">
+              <b>CPU</b>
+              <i>↔</i>
+              <b>Kas</b>
+              <i>↔</i>
+              <b>Geheue</b>
+              <i>↔</i>
+              <b>I/O</b>
+            </div>
+          </article>
+          <article className="le6-topic--green">
+            <span>VERBETERING IN SKYFIE ORGANISASIE EN ARGITEKTUUR</span>
+            <h5>Meer werks-eenhede, slimmer beplanning.</h5>
+            <p>
+              <b>Superskalêr:</b> stuur onafhanklike instruksies na LSE, RLE en
+              VVE. <b>Spekulatief:</b> begin werk op die voorspelde pad.{" "}
+              <b>Datavloei:</b> soek wat nie op ’n vorige resultaat wag nie.
+            </p>
+            <div className="unit-code">
+              <span>LSE</span>
+              <span>RLE</span>
+              <span>VVE</span>
+            </div>
+          </article>
+        </div>
+        <section className="pipeline-tka">
+          <header>
+            <span>VERWERKER SPOED / TKA-VOORBEELD</span>
+            <h5>Pyplyn: GH, DE en UV oorvleuel in tyd.</h5>
+          </header>
+          <table>
+            <thead>
+              <tr>
+                <th>Siklus</th>
+                <th>GH</th>
+                <th>DE</th>
+                <th>UV</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>I1: mov eax,[a]</td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>I2: add ebx,eax</td>
+                <td>I1</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>I3: mov ecx,[b]</td>
+                <td>I2 (wag indien eax nie gereed)</td>
+                <td>I1</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td></td>
+                <td>I3</td>
+                <td>I2 wanneer data gereed is</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <b>Vergelyking:</b> sonder pyplyn voltooi I1 al sy stappe voor I2
+            begin; met pyplyn oorvleuel onafhanklike werk, maar
+            data-afhanklikheid kan ’n vertraging skep.
+          </p>
+        </section>
+      </section>
+      <section>
+        <h4>MEERKERN EN GRAFIESE VERWERKERS</h4>
+        <article className="integrated-core">
+          <span>MEER GEÏNTEGREERDE KERN EN GRAFIESE VERWERKER</span>
+          <h5>
+            CPU-kerne verwerk algemene take; GPU-kerns herhaal baie soortgelyke
+            werk parallel.
+          </h5>
+          <div>
+            <section>
+              <b>CPU</b>
+              <i>Kern 1</i>
+              <i>Kern 2</i>
+              <i>Kern 3</i>
+              <i>Kern 4</i>
+              <small>Buigsame, algemene programvloei.</small>
+            </section>
+            <strong>↔</strong>
+            <section>
+              <b>GPU</b>
+              <div className="gpu-cells">
+                {Array.from({ length: 20 }, (_, index) => (
+                  <i key={index}>{index + 1}</i>
+                ))}
+              </div>
+              <small>
+                Baie eenvoudige, soortgelyke berekeninge oor groot data.
+              </small>
+            </section>
+          </div>
+          <p>
+            <b>Vergelyking:</b> meerkern verbeter parallelle algemene
+            verwerking; ’n GPU blink uit wanneer baie data-elemente dieselfde
+            tipe berekening benodig.
+          </p>
+        </article>
+      </section>
+    </section>
+  );
+}
 
-function Le1PracticeMerge(){const [answers,setAnswers]=useState<Record<string,string>>({});const [marked,setMarked]=useState(false);const [tableAnswers,setTableAnswers]=useState<Record<string,string>>({});const [tableMarked,setTableMarked]=useState(false);const questions=[{id:"decimal",q:"45₁₀ → binêr",a:"101101",n:"32 + 8 + 4 + 1 = 45."},{id:"hex",q:"2C₁₆ → binêr",a:"00101100",n:"2 = 0010 en C = 1100."},{id:"fraction",q:"0,375₁₀ → binêr",a:"0.011",n:"0,375 × 2 gee opeenvolgend 0, 1 en 1."},{id:"binary",q:"1010 0111₂ → heksadesimaal",a:"A7",n:"1010 = A en 0111 = 7."},{id:"hexback",q:"7B₁₆ → binêr",a:"01111011",n:"7 = 0111 en B = 1011."}];const table=[{id:"one",binary:"1010 0110",decimal:"166",hex:"A6",missing:["decimal","hex"]},{id:"two",binary:"0111 1111",decimal:"127",hex:"7F",missing:["binary","hex"]}];const answer=(id:string)=>answers[id]??"";const tableAnswer=(id:string,field:string)=>tableAnswers[`${id}-${field}`]??"";return <><section className="le1-practice"><header><div><span>LE1 / SAAMGEVOEGDE INVULOEFENINGE</span><h3>Omskakel sonder die voorbeeld.</h3><p>Hier vervang een oefenblok die twee vorige reekse. Merk jou antwoorde om die regte waarde en die kort metodeherinnering te sien.</p></div><button type="button" onClick={()=>setMarked(true)}><Check className="size-3.5"/>Merk</button></header><div className="le1-practice__questions">{questions.map((item,index)=>{const ok=normalise(answer(item.id))===normalise(item.a);return <label className={cx(marked&&!ok&&"le1-practice__wrong")} key={item.id}><span>{String(index+1).padStart(2,"0")}</span><b>{item.q}</b><input value={answer(item.id)} onChange={event=>{setAnswers({...answers,[item.id]:event.target.value});setMarked(false)}} placeholder="Jou antwoord"/>{marked?<em className={ok?"le1-practice__correct":""}>{ok?"Korrek":`${item.a} — ${item.n}`}</em>:null}</label>})}</div><footer><button type="button" onClick={()=>{setAnswers({});setMarked(false)}}><RotateCcw className="size-3.5"/>Herstel</button></footer></section><section className="le1-table-practice"><header><span>LE1 / TABEL-OEFENINGE</span><h3>Vul die ontbrekende waardes in.</h3><p>Lees eers die gegewe waarde. Vul daarna net die oop sel(le) in om die binêre, desimale en heksadesimale vorm te koppel.</p></header><div className="overflow-x-auto"><table><thead><tr><th>Vraag</th><th>Binêr</th><th>Desimaal</th><th>Heksadesimaal</th></tr></thead><tbody>{table.map((row,index)=>{const fields:["binary","decimal","hex"]=["binary","decimal","hex"];return <tr key={row.id}><th>{index+1}</th>{fields.map(field=>{const value=row[field as keyof typeof row] as string;const editable=row.missing.includes(field);const key=`${row.id}-${field}`;const ok=normalise(tableAnswer(row.id,field))===normalise(value);return <td key={field}>{editable?<><input aria-label={`Vraag ${index+1}, ${field}`} value={tableAnswer(row.id,field)} onChange={event=>{setTableAnswers({...tableAnswers,[key]:event.target.value});setTableMarked(false)}} placeholder="Vul in" className={cx(tableMarked && (ok ? "le1-table-practice__correct" : "le1-table-practice__wrong"))}/>{tableMarked&&!ok?<small>{value}</small>:null}</>:<code>{value}</code>}</td>})}</tr>})}</tbody></table></div><footer><button type="button" onClick={()=>setTableMarked(true)}><Check className="size-3.5"/>Merk tabel</button><button type="button" onClick={()=>{setTableAnswers({});setTableMarked(false)}}><RotateCcw className="size-3.5"/>Herstel</button></footer></section></>}
+function Le6MovedConcepts() {
+  const [open, setOpen] = useState<"dependency" | "branches" | "">("");
+  return (
+    <section className="le6-moved-concepts">
+      <article>
+        <span>DATA-GEVAAR</span>
+        <h5>Data-afhanklikheid: die verbruiker wag vir die verskaffer.</h5>
+        <p>
+          ’n Instruksie wat ’n register lees wat ’n vroeëre instruksie eers gaan
+          skryf, moet wag totdat die waarde in UV beskikbaar is.
+        </p>
+        <code>
+          mov eax,[a] <b>skryf eax</b> → add ebx,eax <b>lees eax</b>
+        </code>
+        <button
+          type="button"
+          onClick={() => setOpen(open === "dependency" ? "" : "dependency")}
+        >
+          <Play className="size-3.5" />
+          {open === "dependency" ? "Versteek voorbeelde" : "Wys 2 voorbeelde"}
+        </button>
+        {open === "dependency" ? (
+          <ol>
+            <li>
+              <b>Voorbeeld A:</b> <code>mov eax,[a]</code> moet eers voltooi
+              voordat <code>add ebx,eax</code> die waarde lees.
+            </li>
+            <li>
+              <b>Voorbeeld B:</b> <code>mov edx,[b]</code> moet klaar wees
+              voordat <code>imul esi,edx</code> uitvoer.
+            </li>
+          </ol>
+        ) : null}
+      </article>
+      <article>
+        <span>VOORSPEL</span>
+        <h5>Vertakkingvoorspelling: tel foute en vermenigvuldig die straf.</h5>
+        <p>
+          Gebruik die vorige werklike uitkoms as die volgende voorspelling. ’n
+          Fout kos die gegewe aantal siklusse.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Werklik</th>
+              <th>N</th>
+              <th>V</th>
+              <th>V</th>
+              <th>N</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Voorspel</th>
+              <td>N</td>
+              <td>N</td>
+              <td>V</td>
+              <td>V</td>
+            </tr>
+            <tr>
+              <th>Reg/Fout</th>
+              <td>–</td>
+              <td>F</td>
+              <td>R</td>
+              <td>F</td>
+            </tr>
+          </tbody>
+        </table>
+        <button
+          type="button"
+          onClick={() => setOpen(open === "branches" ? "" : "branches")}
+        >
+          <Play className="size-3.5" />
+          {open === "branches" ? "Versteek voorbeelde" : "Wys 2 voorbeelde"}
+        </button>
+        {open === "branches" ? (
+          <p className="le6-moved-concepts__answer">
+            <b>Voorbeeld:</b> 4 foute × 3 siklusse ={" "}
+            <strong>12 siklusse straf</strong>. Die eerste ry tel nie as ’n fout
+            wanneer die vraag dit as korrek gee nie.
+          </p>
+        ) : null}
+      </article>
+    </section>
+  );
+}
 
-function StandardCards({ unit }: { unit: SummaryUnit }) { const [open, setOpen] = useState<Record<string, boolean>>({}); const hidden = unit.id === "le2" ? ["twos-complement", "caq-m", "subtract-flow", "overflow"] : unit.id === "le3" ? ["adders", "flipflop"] : unit.id === "le6" ? ["pipeline", "dependency", "branches", "dataflow", "throughput"] : []; return <div className="deep-card-list">{unit.cards.filter((card) => !hidden.includes(card.id)).map((card) => <article key={card.id}><span>{card.kicker}</span><h4>{card.title}</h4><p>{card.explanation}</p><div className="deep-card-list__visual"><LearningSketch id={card.id} lines={card.sketch} /></div><MultiExample card={card} open={Boolean(open[card.id])} onToggle={() => setOpen((items) => ({ ...items, [card.id]: !items[card.id] }))} /><small><CircleHelp className="size-3.5" />{card.check}</small></article>)}</div>; }
+function TopicDrills({ unitId }: { unitId: string }) {
+  const items = topicDrills[unitId] ?? [];
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [marked, setMarked] = useState(false);
+  const score = items.filter(
+    (item, index) => normalise(answers[index] ?? "") === normalise(item.answer)
+  ).length;
+  return (
+    <section className="topic-drills">
+      <header>
+        <div>
+          <span>MEER INVULOEFENINGE</span>
+          <h3>Een kort vraag vir elke kernonderwerp.</h3>
+          <p>
+            Merk jou antwoorde. ’n Verkeerde antwoord wys die korrekte antwoord
+            én ’n kort hersieningsnota.
+          </p>
+        </div>
+        <Button className="mark-button" onClick={() => setMarked(true)}>
+          <Check className="size-4" /> Merk
+        </Button>
+      </header>
+      <div>
+        {items.map((item, index) => {
+          const isCorrect =
+            normalise(answers[index] ?? "") === normalise(item.answer);
+          return (
+            <label
+              className={cx(marked && !isCorrect && "topic-drills__wrong")}
+              key={item.prompt}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <b>{item.prompt}</b>
+              <input
+                value={answers[index] ?? ""}
+                onChange={event => {
+                  setAnswers(values => ({
+                    ...values,
+                    [index]: event.target.value,
+                  }));
+                  setMarked(false);
+                }}
+                placeholder="Jou antwoord"
+              />
+              {marked ? (
+                <em className={isCorrect ? "topic-drills__correct" : ""}>
+                  {isCorrect ? "Korrek" : `${item.answer} — ${item.note}`}
+                </em>
+              ) : null}
+            </label>
+          );
+        })}
+      </div>
+      <footer>
+        <button
+          type="button"
+          onClick={() => {
+            setAnswers({});
+            setMarked(false);
+          }}
+        >
+          <RotateCcw className="size-4" /> Herstel
+        </button>
+        {marked ? (
+          <strong>
+            {score}/{items.length} korrek
+          </strong>
+        ) : null}
+      </footer>
+    </section>
+  );
+}
 
-export function EnhancedSummaryWorkspace() { const [activeId, setActiveId] = useState("le1"); const [slideOpen, setSlideOpen] = useState(false); const index = summaryUnits.findIndex((unit) => unit.id === activeId); const unit = summaryUnits[index] ?? summaryUnits[0]; const change = (direction: number) => { setActiveId(summaryUnits[(index + direction + summaryUnits.length) % summaryUnits.length].id); requestAnimationFrame(() => document.getElementById("enhanced-unit")?.scrollIntoView({ behavior: "smooth", block: "start" })); }; return <section className="enhanced-summary"><div className="section-intro"><span>OPSOMMING / HOOF → SUB → OEFEN</span><h2>Leer in die volgorde waarin die vrae bou.</h2><p>Die leerkaart groepeer eers die teorie, dan die visuele metode, dan die berekening en uiteindelik die invuloefeninge.</p></div><nav id="study-unit-picker" className="unit-selector unit-selector--v2">{summaryUnits.map((item, itemIndex) => <button key={item.id} type="button" onClick={() => { setActiveId(item.id); requestAnimationFrame(() => document.getElementById("enhanced-unit")?.scrollIntoView({ behavior: "smooth", block: "start" })); }} className={cx(activeId === item.id && "unit-selector--active")}><span>{String(itemIndex + 1).padStart(2, "0")} / {item.code}</span><b>{item.title}</b><em>{item.points}p</em></button>)}</nav><article id="enhanced-unit" className="enhanced-unit"><header><div><span>{unit.code}</span><h2>{unit.title}</h2><p>{unit.focus}</p></div><b>{unit.points}p</b></header>{unit.sourceImage ? <figure className="source-figure source-figure--large"><button type="button" onClick={() => setSlideOpen(true)}><img src={unit.sourceImage} alt={unit.sourceCaption} /><span><Maximize2 className="size-4" /> Vergroot skyfie</span></button><figcaption>{unit.sourceCaption} Klik vir ’n groter, leesbare studieverwysing.</figcaption></figure> : null}<TheoryPanel unitId={unit.id} />{unit.id === "le1" ? <HexPatternTable /> : null}{unit.id === "le2" ? <><NegativeNumbers /><IntegerCalculation /></> : null}{unit.id === "le3" ? <LogicDeepDive /> : null}{unit.id === "le5" ? <><Le5Extras /><IasLab /></> : null}{unit.id === "le6" ? <Le6Extras /> : null}<WordReferencePanels unitId={unit.id} /><StandardCards unit={unit} />{unit.id === "le1" ? <Le1PracticeMerge/> : <><TopicDrills key={unit.id} unitId={unit.id} /><UnitExercises key={`basic-${unit.id}`} unitId={unit.id} title={unit.title} /></>}<footer className="unit-navigation"><button type="button" onClick={() => change(-1)}><ArrowLeft className="size-4" /> Vorige leereenheid</button><button type="button" onClick={() => document.getElementById("study-unit-picker")?.scrollIntoView({ behavior: "smooth", block: "start" })}><ArrowDown className="size-4" /> Terug na leereenhede</button><button type="button" onClick={() => change(1)}>Volgende leereenheid <ArrowRight className="size-4" /></button></footer></article><Dialog open={slideOpen} onOpenChange={setSlideOpen}><DialogContent className="slide-dialog"><DialogHeader><DialogTitle>{unit.title}: klasverwysing</DialogTitle><DialogDescription>{unit.sourceCaption}</DialogDescription></DialogHeader>{unit.sourceImage ? <img src={unit.sourceImage} alt={unit.sourceCaption} /> : null}</DialogContent></Dialog></section>; }
+function Le1PracticeMerge() {
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [marked, setMarked] = useState(false);
+  const [tableAnswers, setTableAnswers] = useState<Record<string, string>>({});
+  const [tableMarked, setTableMarked] = useState(false);
+  const questions = [
+    {
+      id: "decimal",
+      q: "45₁₀ → binêr",
+      a: "101101",
+      n: "32 + 8 + 4 + 1 = 45.",
+    },
+    { id: "hex", q: "2C₁₆ → binêr", a: "00101100", n: "2 = 0010 en C = 1100." },
+    {
+      id: "fraction",
+      q: "0,375₁₀ → binêr",
+      a: "0.011",
+      n: "0,375 × 2 gee opeenvolgend 0, 1 en 1.",
+    },
+    {
+      id: "binary",
+      q: "1010 0111₂ → heksadesimaal",
+      a: "A7",
+      n: "1010 = A en 0111 = 7.",
+    },
+    {
+      id: "hexback",
+      q: "7B₁₆ → binêr",
+      a: "01111011",
+      n: "7 = 0111 en B = 1011.",
+    },
+  ];
+  const table = [
+    {
+      id: "one",
+      binary: "1010 0110",
+      decimal: "166",
+      hex: "A6",
+      missing: ["decimal", "hex"],
+    },
+    {
+      id: "two",
+      binary: "0111 1111",
+      decimal: "127",
+      hex: "7F",
+      missing: ["binary", "hex"],
+    },
+  ];
+  const answer = (id: string) => answers[id] ?? "";
+  const tableAnswer = (id: string, field: string) =>
+    tableAnswers[`${id}-${field}`] ?? "";
+  return (
+    <>
+      <section className="le1-practice">
+        <header>
+          <div>
+            <span>LE1 / SAAMGEVOEGDE INVULOEFENINGE</span>
+            <h3>Omskakel sonder die voorbeeld.</h3>
+            <p>
+              Hier vervang een oefenblok die twee vorige reekse. Merk jou
+              antwoorde om die regte waarde en die kort metodeherinnering te
+              sien.
+            </p>
+          </div>
+          <button type="button" onClick={() => setMarked(true)}>
+            <Check className="size-3.5" />
+            Merk
+          </button>
+        </header>
+        <div className="le1-practice__questions">
+          {questions.map((item, index) => {
+            const ok = normalise(answer(item.id)) === normalise(item.a);
+            return (
+              <label
+                className={cx(marked && !ok && "le1-practice__wrong")}
+                key={item.id}
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <b>{item.q}</b>
+                <input
+                  value={answer(item.id)}
+                  onChange={event => {
+                    setAnswers({ ...answers, [item.id]: event.target.value });
+                    setMarked(false);
+                  }}
+                  placeholder="Jou antwoord"
+                />
+                {marked ? (
+                  <em className={ok ? "le1-practice__correct" : ""}>
+                    {ok ? "Korrek" : `${item.a} — ${item.n}`}
+                  </em>
+                ) : null}
+              </label>
+            );
+          })}
+        </div>
+        <footer>
+          <button
+            type="button"
+            onClick={() => {
+              setAnswers({});
+              setMarked(false);
+            }}
+          >
+            <RotateCcw className="size-3.5" />
+            Herstel
+          </button>
+        </footer>
+      </section>
+      <section className="le1-table-practice">
+        <header>
+          <span>LE1 / TABEL-OEFENINGE</span>
+          <h3>Vul die ontbrekende waardes in.</h3>
+          <p>
+            Lees eers die gegewe waarde. Vul daarna net die oop sel(le) in om
+            die binêre, desimale en heksadesimale vorm te koppel.
+          </p>
+        </header>
+        <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Vraag</th>
+                <th>Binêr</th>
+                <th>Desimaal</th>
+                <th>Heksadesimaal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {table.map((row, index) => {
+                const fields: ["binary", "decimal", "hex"] = [
+                  "binary",
+                  "decimal",
+                  "hex",
+                ];
+                return (
+                  <tr key={row.id}>
+                    <th>{index + 1}</th>
+                    {fields.map(field => {
+                      const value = row[field as keyof typeof row] as string;
+                      const editable = row.missing.includes(field);
+                      const key = `${row.id}-${field}`;
+                      const ok =
+                        normalise(tableAnswer(row.id, field)) ===
+                        normalise(value);
+                      return (
+                        <td key={field}>
+                          {editable ? (
+                            <>
+                              <input
+                                aria-label={`Vraag ${index + 1}, ${field}`}
+                                value={tableAnswer(row.id, field)}
+                                onChange={event => {
+                                  setTableAnswers({
+                                    ...tableAnswers,
+                                    [key]: event.target.value,
+                                  });
+                                  setTableMarked(false);
+                                }}
+                                placeholder="Vul in"
+                                className={cx(
+                                  tableMarked &&
+                                    (ok
+                                      ? "le1-table-practice__correct"
+                                      : "le1-table-practice__wrong")
+                                )}
+                              />
+                              {tableMarked && !ok ? (
+                                <small>{value}</small>
+                              ) : null}
+                            </>
+                          ) : (
+                            <code>{value}</code>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        <footer>
+          <button type="button" onClick={() => setTableMarked(true)}>
+            <Check className="size-3.5" />
+            Merk tabel
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setTableAnswers({});
+              setTableMarked(false);
+            }}
+          >
+            <RotateCcw className="size-3.5" />
+            Herstel
+          </button>
+        </footer>
+      </section>
+    </>
+  );
+}
+
+function StandardCards({ unit }: { unit: SummaryUnit }) {
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const hidden =
+    unit.id === "le2"
+      ? ["twos-complement", "caq-m", "subtract-flow", "overflow"]
+      : unit.id === "le3"
+        ? ["adders", "flipflop"]
+        : unit.id === "le6"
+          ? ["pipeline", "dependency", "branches", "dataflow", "throughput"]
+          : [];
+  return (
+    <div className="deep-card-list">
+      {unit.cards
+        .filter(card => !hidden.includes(card.id))
+        .map(card => (
+          <article key={card.id}>
+            <span>{card.kicker}</span>
+            <h4>{card.title}</h4>
+            <p>{card.explanation}</p>
+            <div className="deep-card-list__visual">
+              <LearningSketch id={card.id} lines={card.sketch} />
+            </div>
+            <MultiExample
+              card={card}
+              open={Boolean(open[card.id])}
+              onToggle={() =>
+                setOpen(items => ({ ...items, [card.id]: !items[card.id] }))
+              }
+            />
+            <small>
+              <CircleHelp className="size-3.5" />
+              {card.check}
+            </small>
+          </article>
+        ))}
+    </div>
+  );
+}
+
+export function EnhancedSummaryWorkspace() {
+  const [activeId, setActiveId] = useState("le1");
+  const [slideOpen, setSlideOpen] = useState(false);
+  const index = summaryUnits.findIndex(unit => unit.id === activeId);
+  const unit = summaryUnits[index] ?? summaryUnits[0];
+  const change = (direction: number) => {
+    setActiveId(
+      summaryUnits[
+        (index + direction + summaryUnits.length) % summaryUnits.length
+      ].id
+    );
+    requestAnimationFrame(() =>
+      document
+        .getElementById("enhanced-unit")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" })
+    );
+  };
+  return (
+    <section className="enhanced-summary">
+      <div className="section-intro">
+        <span>OPSOMMING / HOOF → SUB → OEFEN</span>
+        <h2>Leer in die volgorde waarin die vrae bou.</h2>
+        <p>
+          Die leerkaart groepeer eers die teorie, dan die visuele metode, dan
+          die berekening en uiteindelik die invuloefeninge.
+        </p>
+      </div>
+      <nav id="study-unit-picker" className="unit-selector unit-selector--v2">
+        {summaryUnits.map((item, itemIndex) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => {
+              setActiveId(item.id);
+              requestAnimationFrame(() =>
+                document
+                  .getElementById("enhanced-unit")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              );
+            }}
+            className={cx(activeId === item.id && "unit-selector--active")}
+          >
+            <span>
+              {String(itemIndex + 1).padStart(2, "0")} / {item.code}
+            </span>
+            <b>{item.title}</b>
+            <em>{item.points}p</em>
+          </button>
+        ))}
+      </nav>
+      <article id="enhanced-unit" className="enhanced-unit">
+        <header>
+          <div>
+            <span>{unit.code}</span>
+            <h2>{unit.title}</h2>
+            <p>{unit.focus}</p>
+          </div>
+          <b>{unit.points}p</b>
+        </header>
+        {unit.sourceImage ? (
+          <figure className="source-figure source-figure--large">
+            <button type="button" onClick={() => setSlideOpen(true)}>
+              <img src={unit.sourceImage} alt={unit.sourceCaption} />
+              <span>
+                <Maximize2 className="size-4" /> Vergroot skyfie
+              </span>
+            </button>
+            <figcaption>
+              {unit.sourceCaption} Klik vir ’n groter, leesbare studieverwysing.
+            </figcaption>
+          </figure>
+        ) : null}
+        <TheoryPanel unitId={unit.id} />
+        {unit.id === "le1" ? <HexPatternTable /> : null}
+        {unit.id === "le2" ? (
+          <>
+            <NegativeNumbers />
+            <IntegerCalculation />
+          </>
+        ) : null}
+        {unit.id === "le3" ? <LogicDeepDive /> : null}
+        {unit.id === "le5" ? (
+          <>
+            <Le5Organisation />
+            <Le5Extras />
+            <section className="le5-major-block le5-major-block--ias">
+              <header>
+                <span>LE5 / IAS REKENAAR</span>
+                <h3>IAS REKENAAR</h3>
+                <p>
+                  Die registerpad, 40-bis woord, tabelpatroon, invuloefeninge en
+                  TKA-voorbeelde werk saam in een IAS-leerblok.
+                </p>
+              </header>
+              <IasLab />
+            </section>
+            <Le5MemoryModules />
+          </>
+        ) : null}
+        {unit.id === "le6" ? <Le6Extras /> : null}
+        <WordReferencePanels unitId={unit.id} />
+        <StandardCards unit={unit} />
+        {unit.id === "le1" ? (
+          <Le1PracticeMerge />
+        ) : (
+          <>
+            <TopicDrills key={unit.id} unitId={unit.id} />
+            <UnitExercises
+              key={`basic-${unit.id}`}
+              unitId={unit.id}
+              title={unit.title}
+            />
+          </>
+        )}
+        <footer className="unit-navigation">
+          <button type="button" onClick={() => change(-1)}>
+            <ArrowLeft className="size-4" /> Vorige leereenheid
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("study-unit-picker")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+          >
+            <ArrowDown className="size-4" /> Terug na leereenhede
+          </button>
+          <button type="button" onClick={() => change(1)}>
+            Volgende leereenheid <ArrowRight className="size-4" />
+          </button>
+        </footer>
+      </article>
+      <Dialog open={slideOpen} onOpenChange={setSlideOpen}>
+        <DialogContent className="slide-dialog">
+          <DialogHeader>
+            <DialogTitle>{unit.title}: klasverwysing</DialogTitle>
+            <DialogDescription>{unit.sourceCaption}</DialogDescription>
+          </DialogHeader>
+          {unit.sourceImage ? (
+            <img src={unit.sourceImage} alt={unit.sourceCaption} />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
+}
