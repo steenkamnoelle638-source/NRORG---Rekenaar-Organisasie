@@ -54,3 +54,13 @@
 .integer-calculation__blocks>.integer-division-examples-slot{grid-column:2;min-width:0}
 .integer-calculation__blocks>.integer-division-examples-slot>.integer-division-theory{width:100%;box-sizing:border-box}
 @media(max-width:760px){.integer-calculation__blocks{grid-template-columns:1fr}.integer-calculation__blocks>article:nth-of-type(1),.integer-calculation__blocks>article:nth-of-type(2),.integer-calculation__blocks>article:nth-of-type(3),.integer-calculation__blocks>.integer-division-examples-slot{grid-column:1}}
+
+/* LE2: die drie rekenkundige metodekaarte gebruik dieselfde geel/oranje aksent as MAAL. */
+.integer-calculation__blocks>article:nth-of-type(2),
+.integer-calculation__blocks>article:nth-of-type(3),
+.integer-calculation__blocks>.integer-division-examples-slot{border-top:3px solid #C17832;border-left:3px solid #C17832;background:#FFF8F0}
+.integer-calculation__blocks>.integer-division-examples-slot>.integer-division-theory{border-top:0!important;border-left:0!important;background:transparent!important;color:#5B5C57}
+.integer-calculation__blocks>.integer-division-examples-slot>.integer-division-theory>span{color:#B25A1B!important}
+.integer-calculation__blocks>.integer-division-examples-slot>.integer-division-theory h4{color:#6D471E}
+.integer-calculation__blocks>.integer-division-examples-slot>.integer-division-theory>p{color:#5B5C57}
+@media(max-width:760px){.integer-calculation__blocks>article:nth-of-type(2),.integer-calculation__blocks>article:nth-of-type(3),.integer-calculation__blocks>.integer-division-examples-slot{border-left:3px solid #C17832}}
